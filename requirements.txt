@@ -1,0 +1,10 @@
+flask
+flask_cors
+pyswisseph
+waitress
+gunicorn
+pytz
+python-dateutil
+redis
+flask-limiter
+python-dotenv
