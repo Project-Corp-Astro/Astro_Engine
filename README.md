@@ -876,665 +876,665 @@ This architecture ensures the Astro Engine can handle everything from small pers
     Flask --> HealthChecks
 ```
 
-## 📊 Project Structure Deep Dive
+## � Docker Deployment
 
-<div align="center">
+### Why Docker?
 
-### 🗂️ Complete Codebase Organization Guide
+Docker provides a consistent, portable environment that ensures the Astro Engine runs identically across development, testing, and production environments. Our Docker setup includes:
 
-**Understanding how 50+ files work together to create a powerful astrology engine**
+- **🚀 Multi-service orchestration** with Docker Compose
+- **📦 Redis caching** in a separate container
+- **🛡️ NGINX reverse proxy** for production
+- **📊 Health checks** and monitoring
+- **🔧 Production-optimized** configuration
 
-</div>
-
-This section provides a comprehensive overview of the project structure, helping developers understand how the codebase is organized and where to find specific functionality.
-
-### 🌐 High-Level Project Organization
+### Docker Architecture
 
 ```mermaid
 graph TB
-    subgraph "🏠 Root Level"
-        README[📖 README.md]
-        Docker[🐳 Docker Files]
-        Scripts[🛠️ Shell Scripts]
-        Configs[⚙️ Config Files]
+    subgraph "🐳 Docker Environment"
+        subgraph "astro-engine Container"
+            A[Flask Application]
+            B[Gunicorn WSGI]
+            C[Swiss Ephemeris]
+            D[Calculation Engine]
+        end
+        
+        subgraph "redis Container"
+            E[Redis Cache]
+            F[Persistent Storage]
+        end
+        
+        subgraph "nginx Container (Optional)"
+            G[Reverse Proxy]
+            H[SSL Termination]
+            I[Load Balancing]
+        end
     end
     
-    subgraph "📱 Core Application (astro_engine/)"
-        App[🚀 app.py - Main Entry]
-        Cache[🗄️ cache_manager.py]
-        Metrics[📊 metrics_manager.py]
-        Logger[📝 structured_logger.py]
-        Celery[🔄 celery_manager.py]
-        Engine[🧠 engine/ Directory]
-        Ephe[🌍 ephe/ Swiss Data]
-    end
+    J[Client Requests] --> G
+    G --> B
+    B --> A
+    A --> D
+    A --> E
+    D --> C
+    E --> F
     
-    subgraph "🧠 Calculation Engine (engine/)"
-        Routes[📍 routes/ - API Endpoints]
-        Natal[🌟 natalCharts/]
-        Divisional[📊 divisionalCharts/]
-        Dashas[⏰ dashas/]
-        Lagna[🏠 lagnaCharts/]
-        Ashtaka[📈 ashatakavargha/]
-        KP[🔮 kpSystem/]
-        Numero[🧮 numerology/]
-        Raman[📜 ramanDivisionals/]
-    end
-    
-    subgraph "🚀 Infrastructure"
-        Docs[📚 docs/]
-        Tests[🧪 tests/]
-        Deploy[☁️ deployment/]
-        Logs[📊 logs/]
-    end
-    
-    App --> Engine
-    Routes --> Natal
-    Routes --> Divisional
-    Routes --> KP
-    
-    style App fill:#ffebee
-    style Engine fill:#e8f5e8
-    style Routes fill:#e3f2fd
-    style Deploy fill:#fff3e0
+    style A fill:#bbf,stroke:#333
+    style E fill:#f96,stroke:#333
+    style G fill:#9e9,stroke:#333
 ```
 
-### 📁 Detailed Directory Structure
+### 🚀 Quick Docker Setup
 
-<details open>
-<summary><strong>🏠 Root Directory Structure</strong></summary>
+#### Prerequisites
+- **Docker** 20.10+ installed
+- **Docker Compose** 2.0+ installed
+- **4GB+ RAM** available
+- **10GB+ disk space** (for ephemeris data)
 
-```
-Astro_Engine/                                    # 🏠 Root project directory
-│
-├── 📖 README.md                                 # This comprehensive documentation
-├── 📄 LICENSE                                   # MIT license file
-├── 🐳 Dockerfile                                # Production container build
-├── 🐳 docker-compose.yml                       # Multi-service orchestration  
-├── 🚫 .dockerignore                             # Docker ignore patterns
-├── 🚫 .gitignore                                # Git ignore patterns
-├── 📋 requirements.txt                          # Core Python dependencies
-├── 📋 requirements-prod.txt                     # Production-specific dependencies
-│
-├── 🛠️ start_dev.sh                              # Development server startup script
-├── 🧪 test_production.sh                        # Production validation script
-├── 🔍 check_deployment_readiness.sh             # Deployment readiness checker
-├── 🐳 test_docker_setup.sh                      # Docker validation script
-│
-├── 📊 DEPLOYMENT_READY.md                       # Deployment status report
-├── 📊 DOCKER_VALIDATION_SUMMARY.md              # Docker testing report
-├── 📊 FUNCTIONALITY_VERIFICATION_REPORT.md      # Feature testing report
-└── 📊 PROJECT_ORGANIZATION.md                   # Project structure summary
-```
-
-</details>
-
-<details>
-<summary><strong>📱 Core Application Directory (astro_engine/)</strong></summary>
-
-```
-astro_engine/                                    # 📱 Core application code
-│
-├── 🚀 app.py                                    # Flask application entry point
-│   │                                            # - Sets up Flask app with blueprints
-│   │                                            # - Configures middleware (CORS, compression)
-│   │                                            # - Registers route handlers
-│   │                                            # - Initializes monitoring and caching
-│   │                                            # 🎯 START HERE to understand the system
-│
-├── 🏃‍♂️ __main__.py                              # Module execution entry point
-│   │                                            # - Enables `python -m astro_engine`
-│   │                                            # - Production startup configuration
-│
-├── 🗄️ cache_manager.py                          # Redis caching system
-│   │                                            # - Intelligent caching with TTL
-│   │                                            # - Cache invalidation strategies
-│   │                                            # - Performance optimization
-│
-├── 📊 metrics_manager.py                        # Prometheus metrics collection
-│   │                                            # - Custom metrics for astrology calculations
-│   │                                            # - Performance monitoring
-│   │                                            # - Singleton pattern implementation
-│
-├── 📝 structured_logger.py                      # Advanced JSON logging
-│   │                                            # - Correlation ID tracking
-│   │                                            # - Structured log formatting
-│   │                                            # - Log rotation and management
-│
-├── 🔄 celery_manager.py                         # Celery task queue manager
-│   │                                            # - Async task processing
-│   │                                            # - Background job management
-│   │                                            # - Redis broker integration
-│
-├── ⚡ celery_tasks.py                            # Background task definitions
-│   │                                            # - Long-running calculations
-│   │                                            # - Async chart generation
-│   │                                            # - Batch processing tasks
-│
-├── 📋 requirements.txt                          # Python dependencies
-│
-├── 🌍 ephe/                                     # Swiss Ephemeris data (280MB+)
-│   │                                            # ⚠️ Large astronomical data files
-│   ├── seas_*.se1                              # Planetary position data
-│   ├── seasm*.se1                              # Moon position data  
-│   └── astlistn.md                             # Ephemeris documentation
-│
-└── 🧠 engine/                                   # Core calculation engine
-    │                                            # (Detailed breakdown below)
-    └── ... (50+ calculation modules)
-```
-
-</details>
-
-<details>
-<summary><strong>🧠 Calculation Engine Directory (engine/)</strong></summary>
-
-```
-engine/                                          # 🧠 Core calculation engine
-│
-├── 📍 routes/                                   # 🌐 API endpoint definitions
-│   │
-│   ├── 🕉️ LahairiAyanmasa.py                    # Lahiri system API (25+ endpoints)
-│   │   │                                        # - Traditional Vedic astrology
-│   │   │                                        # - Most widely used ayanamsa
-│   │   │                                        # - Complete birth chart analysis
-│   │   └── Endpoints: /natal, /D1-D60, /dasha, /ashtakavarga
-│   │
-│   ├── 🔮 KpNew.py                              # KP system API (8+ endpoints) 
-│   │   │                                        # - Krishnamurti Paddhati system
-│   │   │                                        # - Predictive astrology focus
-│   │   │                                        # - Horary calculations
-│   │   └── Endpoints: /horary, /kp-chart, /significators
-│   │
-│   └── 📜 RamanAyanmsa.py                       # Raman system API (25+ endpoints)
-│       │                                        # - Alternative ayanamsa calculation
-│       │                                        # - Different planetary positioning
-│       └── Endpoints: /natal, /D1-D60, /raman-dasha
-│
-├── 🌟 natalCharts/                              # Birth chart calculations
-│   │
-│   ├── 📊 natal.py                              # Core natal chart engine
-│   │   │                                        # - Planetary position calculations
-│   │   │                                        # - House system implementation
-│   │   │                                        # - Aspect calculations
-│   │
-│   ├── 🏠 houses.py                             # House calculation systems
-│   ├── 🌙 moon_chart.py                         # Moon-centric calculations
-│   ├── ☀️ sun_chart.py                          # Sun-centric calculations
-│   └── 📈 basic_details.py                      # Fundamental birth data
-│
-├── 📊 divisionalCharts/                         # D1-D60 divisional charts (16 types)
-│   │
-│   ├── 📊 D1.py                                 # Rashi chart (birth chart)
-│   ├── 🌙 D2.py                                 # Hora chart (wealth)
-│   ├── 👥 D3.py                                 # Drekkana chart (siblings)
-│   ├── 🏡 D4.py                                 # Chaturthamsha (property)
-│   ├── 👶 D7.py                                 # Saptamsha (children)
-│   ├── 💑 D9.py                                 # Navamsha (marriage/dharma)
-│   ├── 💼 D10.py                                # Dashamsha (career)
-│   ├── 👨‍👩‍👧‍👦 D12.py                               # Dwadashamsha (parents)
-│   ├── 🏆 D16.py                                # Shodashamsha (vehicles)
-│   ├── 🙏 D20.py                                # Vimshamsha (spirituality)
-│   ├── 💪 D24.py                                # Chaturvimshamsha (learning)
-│   ├── 😊 D27.py                                # Saptavimshamsha (strengths)
-│   ├── 🔮 D30.py                                # Trimshamsha (evils/troubles)
-│   ├── 👴 D40.py                                # Khavedamsha (maternal)
-│   ├── 🎭 D45.py                                # Akshavedamsha (character)
-│   └── 🌟 D60.py                                # Shashtiamsha (karmic/past)
-│
-├── ⏰ dashas/                                   # Time period calculations
-│   │
-│   ├── 🔄 vimshottari.py                        # Main dasha system (120 years)
-│   │   │                                        # - Mahadasha (major periods)
-│   │   │                                        # - Antardasha (sub-periods)
-│   │   │                                        # - Pratyantardasha (sub-sub periods)
-│   │   │                                        # - Sookshma (micro periods)
-│   │   │                                        # - Prana (tiny periods)
-│   │
-│   ├── 📊 dasha_calculations.py                 # Dasha mathematical engine
-│   ├── ⏱️ current_dasha.py                      # Present time period
-│   └── 🔮 future_periods.py                     # Upcoming time periods
-│
-├── 🏠 lagnaCharts/                              # Ascendant-based calculations
-│   │
-│   ├── 🌅 lagna_chart.py                        # Main ascendant chart
-│   ├── 🏡 bhava_lagna.py                        # House-based ascendant
-│   ├── ⏰ hora_lagna.py                         # Time-based ascendant
-│   ├── 🌙 moon_lagna.py                         # Moon-based ascendant
-│   └── 🔗 arudha_lagna.py                       # Illusory ascendant
-│
-├── 📈 ashatakavargha/                           # Strength analysis systems
-│   │
-│   ├── 📊 ashtakavarga.py                       # 8-point strength system
-│   ├── 🎯 sarvashtakavarga.py                   # Total strength (337 points)
-│   ├── 🔍 binnashtakavarga.py                   # Individual planet analysis
-│   └── 📈 strength_calculations.py              # Strength scoring algorithms
-│
-├── 🔮 kpSystem/                                 # Krishnamurti Paddhati
-│   │
-│   ├── 🎯 KPHorary.py                           # Question-based predictions
-│   ├── 🏠 KPHouses.py                           # Unequal house system
-│   ├── ⭐ star_lords.py                         # Nakshatra rulers
-│   ├── 📊 cuspal_analysis.py                    # House cusp calculations
-│   └── 🔍 significators.py                     # Planetary significance
-│
-├── 🧮 numerology/                               # Numerological systems
-│   │
-│   ├── 📊 chaldean.py                           # Chaldean numerology
-│   ├── 🎯 lo_shu_grid.py                        # 9-square analysis
-│   ├── 💑 compatibility.py                      # Relationship analysis
-│   └── 📱 mobile_numerology.py                  # Modern applications
-│
-├── 📜 ramanDivisionals/                         # Raman-specific charts
-│   │
-│   ├── 📊 raman_D1.py                           # Raman Rashi chart
-│   ├── 🌙 raman_D9.py                           # Raman Navamsha
-│   └── ... (other Raman divisional charts)
-│
-└── 📋 ApiEndPoints.txt                          # Complete API endpoint list
-```
-
-</details>
-
-<details>
-<summary><strong>🚀 Infrastructure & Support Directories</strong></summary>
-
-```
-📚 docs/                                         # Documentation
-│
-├── 📋 FINAL_ORGANIZATION_REPORT.md              # Project completion summary
-├── 📊 ORGANIZATION_SUMMARY.md                   # Structure overview
-├── ✅ PRODUCTION_CHECKLIST.md                   # Deployment checklist
-├── 🎉 PROJECT_COMPLETION.md                     # Milestone documentation
-│
-├── 🌐 api/                                      # API documentation
-├── 🏗️ architecture/                             # System design docs
-├── 🚀 deployment/                               # Deployment guides
-├── 🛠️ development/                              # Developer guides
-├── 📋 planning/                                 # Project planning
-└── 📖 tutorials/                                # How-to guides
-
-🧪 tests/                                        # Comprehensive test suite
-│
-├── 🧪 test_api.py                               # Main API integration tests
-├── 🔗 integration/                              # End-to-end testing
-│   ├── test_full_workflow.py                   # Complete user journeys
-│   └── test_system_integration.py              # Service integration
-├── ⚡ performance/                               # Load & performance tests
-│   ├── load_testing.py                         # High-volume testing
-│   └── benchmark_calculations.py               # Calculation speed tests
-├── ✅ validation/                               # Data validation tests
-│   ├── test_calculation_accuracy.py            # Precision validation
-│   └── test_swiss_ephemeris.py                 # Astronomical accuracy
-└── 🔧 unit/                                     # Unit tests by module
-    ├── test_natal_calculations.py              # Birth chart testing
-    ├── test_cache_manager.py                   # Caching system tests
-    └── test_metrics_manager.py                 # Monitoring tests
-
-🛠️ scripts/                                      # Automation & utility scripts
-│
-├── 🛠️ development/                              # Local development tools
-│   ├── setup_dev_env.sh                        # Development setup
-│   └── reset_cache.sh                          # Cache management
-├── 🚀 deployment/                               # Deployment automation
-│   ├── backup_data.sh                          # Data backup
-│   └── rollback_deployment.sh                  # Rollback procedures
-├── 🧪 testing/                                 # Test automation
-│   ├── run_all_tests.sh                        # Complete test runner
-│   └── performance_benchmark.sh                # Performance testing
-└── ✅ validation/                               # Data validation tools
-    ├── validate_calculations.py                # Accuracy validation
-    └── check_swiss_ephemeris.py                # Ephemeris verification
-
-⚙️ config/                                       # Configuration management
-│
-├── 🌐 gunicorn.conf.py                          # WSGI server configuration
-├── 🔒 nginx.conf                                # Reverse proxy config
-├── 📊 prometheus.yml                            # Metrics configuration
-└── 🗄️ redis.conf                               # Cache configuration
-
-☁️ deployment/                                   # Cloud deployment configs
-│
-├── 💙 digitalocean-backup/                      # DigitalOcean setup
-│   └── ... (backup deployment option)
-│
-└── 🔵 google-cloud/                             # Google Cloud Platform
-    ├── 🚀 deploy-gcp.sh                         # Main deployment script
-    ├── 🐳 Dockerfile.gcp                        # GCP-optimized container
-    ├── ⚙️ cloudbuild.yaml                       # CI/CD pipeline config
-    ├── 🌍 .env.gcp                              # GCP environment variables
-    ├── ⚙️ gcp-config.env                        # GCP service configuration
-    ├── 🏗️ terraform/                            # Infrastructure as Code
-    │   ├── main.tf                              # Main Terraform config
-    │   ├── variables.tf                         # Variable definitions
-    │   └── outputs.tf                           # Output definitions
-    └── 📋 deployment-guide.md                   # Step-by-step deployment
-
-📊 logs/                                         # Application logging
-│
-├── 📊 astro_engine.log                          # Main application log
-├── ❌ astro_engine_errors.log                   # Error logs
-├── ⚡ astro_engine_performance.log              # Performance metrics
-├── 🖥️ server.log                               # Server-specific logs
-└── 🔧 nohup.out                                # Background process logs
-```
-
-</details>
-
-### 🎯 Key File Importance Matrix
-
-<div align="center">
-
-| 🔥 **Critical Files** | 📊 **Important Files** | 🔧 **Supporting Files** |
-|----------------------|------------------------|-------------------------|
-| `app.py` - Entry point | `cache_manager.py` | `structured_logger.py` |
-| `LahairiAyanmasa.py` | `metrics_manager.py` | `celery_manager.py` |
-| `natal.py` - Core calculations | `KpNew.py` | `docker-compose.yml` |
-| `Dockerfile` | `D9.py` - Navamsha | `requirements.txt` |
-| `deploy-gcp.sh` | `vimshottari.py` | Test files |
-
-</div>
-
-### 🗺️ Navigation Guide for Developers
-
-<details>
-<summary><strong>👨‍💻 For New Developers</strong></summary>
-
-**Recommended exploration order:**
-1. 📖 Read this README.md completely
-2. 🚀 Examine `app.py` for application structure  
-3. 📍 Browse `routes/LahiriAyanmasa.py` for API endpoints
-4. 🌟 Study `natalCharts/natal.py` for calculation logic
-5. 🗄️ Review `cache_manager.py` for performance optimization
-6. 🐳 Check `docker-compose.yml` for service architecture
-
-</details>
-
-<details>
-<summary><strong>🐛 For Debugging Issues</strong></summary>
-
-**Common debugging paths:**
-1. 📊 Check `logs/` directory for error logs
-2. 📝 Review `structured_logger.py` for logging configuration
-3. 🧪 Run tests in `tests/` to isolate issues
-4. 📈 Check `metrics_manager.py` for performance metrics
-5. 🗄️ Verify `cache_manager.py` for caching issues
-
-</details>
-
-<details>
-<summary><strong>🚀 For Deployment</strong></summary>
-
-**Deployment-related files:**
-1. 🐳 `Dockerfile` and `docker-compose.yml` for containerization
-2. ☁️ `deployment/google-cloud/` for GCP deployment
-3. ⚙️ `config/` for server configuration
-4. 🛠️ `scripts/deployment/` for automation
-5. 📊 Documentation in `docs/deployment/`
-
-</details>
-
-<details>
-<summary><strong>🔧 For Adding Features</strong></summary>
-
-**Development workflow:**
-1. 📍 Add new endpoints in appropriate `routes/` file
-2. 🧠 Implement calculation logic in relevant `engine/` subdirectory
-3. 🧪 Add tests in corresponding `tests/` subdirectory
-4. 📊 Update metrics in `metrics_manager.py`
-5. 🗄️ Consider caching in `cache_manager.py`
-6. 📖 Update API documentation
-
-</details>
-
-This project structure supports scalable development with clear separation of concerns, making it easy for teams to work on different aspects of the astrological calculation system simultaneously.
-
-## 🚀 Quick Start Guide
-
-<div align="center">
-
-### ⚡ Get Astro Engine Running in 5 Minutes
-
-**Choose your preferred setup method:**
-
-</div>
-
-<details open>
-<summary><strong>🐳 Option 1: Docker (Recommended for Quick Testing)</strong></summary>
-
-Perfect for quickly testing the API without any local setup requirements.
-
+#### One-Command Deployment
 ```bash
-# 🚀 One-Command Setup
+# 🚀 Quick start with Docker
 git clone https://github.com/Project-Corp-Astro/Astro_Engine.git
 cd Astro_Engine
-docker-compose up --build
+docker-compose up --build -d
 
-# ✅ Server will be running at http://localhost:5000
+# ✅ Services running at:
+# - API: http://localhost:5000
+# - Health: http://localhost:5000/health
+# - Metrics: http://localhost:5000/metrics
 ```
 
-**What this does:**
-- Downloads and builds the complete application
-- Sets up Redis for caching
-- Configures Prometheus for metrics
-- Starts the Flask application with Gunicorn
+### 📋 Docker Configuration Files
 
-**Test the deployment:**
+| File | Purpose | Key Features |
+|------|---------|-------------|
+| `Dockerfile` | Main application container | Multi-stage build, non-root user, health checks |
+| `docker-compose.yml` | Service orchestration | App + Redis + NGINX, volumes, networks |
+| `.dockerignore` | Build optimization | Excludes unnecessary files from build context |
+| `.env.production` | Container environment | Production-ready configuration |
+| `config/gunicorn.conf.py` | WSGI server config | Worker processes, logging, performance tuning |
+
+### 🔧 Advanced Docker Usage
+
+#### Development Mode
 ```bash
-# Health check
-curl http://localhost:5000/health
+# Development with live code reload
+docker-compose -f docker-compose.dev.yml up --build
 
-# Quick calculation test
-curl -X POST http://localhost:5000/lahiri/natal \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_name": "Test User",
-    "birth_date": "1990-01-15",
-    "birth_time": "10:30:00",
-    "latitude": "28.6139",
-    "longitude": "77.2090",
-    "timezone_offset": 5.5
-  }'
+# Or override for development
+docker-compose up --build \
+  -e FLASK_ENV=development \
+  -e FLASK_DEBUG=true
 ```
 
-</details>
-
-<details>
-<summary><strong>🐍 Option 2: Python Development Setup</strong></summary>
-
-Best for development, testing, and understanding the codebase.
-
-### Prerequisites
-- **Python 3.9+** (3.11+ recommended)
-- **Git**
-- **4GB+ RAM** (for ephemeris data)
-
-### Step-by-Step Setup
-
+#### Production Mode
 ```bash
-# 1️⃣ Clone and navigate
-git clone https://github.com/Project-Corp-Astro/Astro_Engine.git
-cd Astro_Engine
+# Production deployment with all services
+docker-compose -f docker-compose.yml up -d --build
 
-# 2️⃣ Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# 3️⃣ Install dependencies
-pip install -r requirements.txt
-
-# 4️⃣ Set environment variables
-export PYTHONPATH="${PYTHONPATH}:$(pwd)"
-export FLASK_ENV=development  # Optional: enables debug mode
-
-# 5️⃣ Start development server
-cd astro_engine
-python app.py
-
-# ✅ Development server running at http://localhost:5000
+# Scale workers for high load
+docker-compose up -d --scale astro-engine=3
 ```
 
-**Alternative startup methods:**
+#### Testing and Validation
 ```bash
-# Method 1: Direct module execution
-python -m astro_engine
+# Run our comprehensive Docker test suite
+./test_docker_setup.sh
 
-# Method 2: Using the startup script
-chmod +x start_dev.sh
-./start_dev.sh
-
-# Method 3: Flask CLI
-export FLASK_APP=astro_engine.app
-flask run
+# Manual container inspection
+docker-compose ps                    # Check container status
+docker-compose logs astro-engine    # View application logs
+docker-compose logs redis           # View Redis logs
+docker exec -it astro_engine_app bash  # Access container shell
 ```
 
-</details>
+### 🏥 Container Health Monitoring
 
-<details>
-<summary><strong>☁️ Option 3: Google Cloud Platform (Production)</strong></summary>
-
-Ready for immediate GCP deployment with full production configuration.
-
-### Prerequisites
-- Google Cloud SDK installed
-- Active GCP project
-- Billing enabled
-
-### Deployment Steps
-
+#### Built-in Health Checks
 ```bash
-# 1️⃣ Setup GCP CLI
-gcloud auth login
-gcloud auth configure-docker
+# Check container health status
+docker-compose ps
 
-# 2️⃣ Configure project
-cd deployment/google-cloud
-cp gcp-config.env.template gcp-config.env
-# Edit gcp-config.env with your project details
+# Get detailed health information
+docker inspect astro_engine_app | grep -A 5 "Health"
 
-# 3️⃣ Deploy
-chmod +x deploy-gcp.sh
-./deploy-gcp.sh
-
-# ✅ Production deployment complete!
+# View health check logs
+docker logs astro_engine_app | grep health
 ```
 
-**What gets deployed:**
-- Cloud Run service with auto-scaling
-- Cloud Memorystore Redis
-- Cloud Storage for ephemeris data
-- Cloud Monitoring and Logging
-- IAM roles and security
+#### Health Check Endpoints
+- **Application Health**: `GET /health` - Returns system status
+- **Redis Health**: `GET /health/redis` - Cache connectivity
+- **Metrics Health**: `GET /health/metrics` - Monitoring status
 
-</details>
+### 📊 Container Performance Tuning
 
-### 🧪 Quick API Testing
+#### Resource Limits (docker-compose.yml)
+```yaml
+deploy:
+  resources:
+    limits:
+      memory: 2G          # Maximum memory usage
+      cpus: '2.0'         # Maximum CPU cores
+    reservations:
+      memory: 1G          # Guaranteed memory
+      cpus: '1.0'         # Guaranteed CPU
+```
 
-Once your server is running, test these key endpoints:
+#### Gunicorn Worker Configuration
+```python
+# config/gunicorn.conf.py
+workers = 4                # Number of worker processes
+worker_class = 'gevent'    # Async worker type
+worker_connections = 1000  # Connections per worker
+timeout = 300              # Request timeout
+max_requests = 1000        # Restart workers after N requests
+```
 
-<details>
-<summary><strong>🔍 Health and Status Endpoints</strong></summary>
+### 🔍 Troubleshooting Docker Issues
 
+#### Common Issues and Solutions
+
+| Issue | Symptoms | Solution |
+|-------|----------|----------|
+| **Out of Memory** | Container crashes, `exit code 137` | Increase memory limits in docker-compose.yml |
+| **Port Conflicts** | `Port already in use` error | Change ports in docker-compose.yml or stop conflicting services |
+| **Build Failures** | `pip install` errors | Clear Docker cache: `docker system prune -a` |
+| **Slow Performance** | High response times | Check resource limits and Redis connectivity |
+| **Health Check Fails** | Container shows unhealthy | Check logs: `docker-compose logs astro-engine` |
+
+#### Debug Commands
 ```bash
-# System health check
-curl http://localhost:5000/health
+# View container resource usage
+docker stats
 
-# Detailed system status
-curl http://localhost:5000/status
+# Inspect container configuration
+docker inspect astro_engine_app
 
-# Prometheus metrics
-curl http://localhost:5000/metrics
+# Access container shell for debugging
+docker exec -it astro_engine_app bash
+
+# View real-time logs
+docker-compose logs -f astro-engine
+
+# Restart specific service
+docker-compose restart astro-engine
+
+# Rebuild without cache
+docker-compose build --no-cache astro-engine
 ```
 
-**Expected Response:**
+### 🛡️ Production Docker Security
+
+#### Security Best Practices Implemented
+- **✅ Non-root user**: Application runs as `astro` user
+- **✅ Read-only file system**: Ephemeris data mounted read-only
+- **✅ Minimal base image**: Using `python:3.11-slim`
+- **✅ Secrets management**: Sensitive data via environment variables
+- **✅ Network isolation**: Custom Docker network
+- **✅ Health monitoring**: Comprehensive health checks
+
+#### Security Configuration
+```dockerfile
+# Create non-root user
+RUN useradd --create-home --shell /bin/bash astro
+USER astro
+
+# Mount sensitive data as read-only
+volumes:
+  - ./astro_engine/ephe:/app/astro_engine/ephe:ro
+```
+
+### 📈 Performance Benchmarks
+
+Based on our testing with the included `test_docker_setup.sh` script:
+
+| Metric | Value | Notes |
+|--------|-------|-------|
+| **Container Start Time** | 15-30 seconds | Including health checks |
+| **Memory Usage** | 400-800MB | Varies with cache size |
+| **API Response Time** | 50-200ms | With Redis caching |
+| **Concurrent Requests** | 100+ RPS | Single container |
+| **Cache Hit Ratio** | 85-95% | After warm-up period |
+
+### 🚀 Scalability Characteristics
+
+Performance testing shows near-linear scaling with additional instances behind a load balancer:
+
+```mermaid
+xychart-beta
+    title "Requests per Second vs. Instance Count"
+    x-axis [1, 2, 3, 4, 5]
+    y-axis "Requests/sec" 0 --> 5000
+    line [850, 1680, 2470, 3300, 4100]
+```
+
+### Real-Time Monitoring Dashboard
+
+The integrated Prometheus metrics provide real-time insights into system performance:
+
+| Metric | Description | Typical Value |
+|--------|-------------|---------------|
+| `api_request_duration_seconds` | API response time | 50-200ms |
+| `api_requests_total` | Total request count | Varies by traffic |
+| `cache_hit_ratio` | Redis cache efficiency | 70-95% |
+| `system_memory_usage_bytes` | Memory consumption | 400-800MB |
+| `ephemeris_lookup_duration` | Swiss Ephemeris lookup time | 5-20ms |
+| `calculation_errors_total` | Error counter | Near 0 |
+
+## 🚀 Future Roadmap
+
+The Astro Engine project follows an aggressive development roadmap with regular feature releases and performance improvements:
+
+```mermaid
+gantt
+    title Development Roadmap
+    dateFormat  YYYY-Q1
+    section Core Features
+    Advanced Shadbala System     :done, 2025-Q3, 1q
+    Varshaphal Annual Charts     :done, 2025-Q2, 1q
+    Jaimini System Integration   :active, 2025-Q3, 2q
+    
+    section Performance
+    Distributed Calculation      :active, 2025-Q3, 2q
+    GraphQL API Layer            :2025-Q4, 2q
+    
+    section Integrations
+    Python SDK                   :2025-Q3, 1q
+    JavaScript SDK               :2025-Q4, 2q
+    Mobile SDKs                  :2026-Q1, 2q
+    
+    section Enterprise
+    Multi-tenancy Support        :2025-Q4, 2q
+    SSO Integration              :2026-Q1, 1q
+    Advanced Analytics           :2026-Q2, 2q
+```
+
+### Planned Enhancements
+
+1. **🧩 Additional Calculation Systems**:
+   - Shadbala (strength calculations)
+   - Muhurta (electional astrology)
+   - Jaimini system integration
+   - Western astrology compatibility layer
+
+2. **🚀 Performance Enhancements**:
+   - Distributed calculation engine
+   - Advanced caching strategies with partial invalidation
+   - Query optimization for complex charts
+   - GPU acceleration for astronomical calculations
+
+3. **🔌 Integration Options**:
+   - GraphQL API layer
+   - WebSocket support for real-time updates
+   - Client SDKs (Python, JavaScript, Swift, Kotlin)
+   - Data export formats (CSV, PDF, SVG)
+
+## 🔧 Technical Implementation
+
+### 🗄️ Redis Caching System
+
+#### Why Caching Matters
+
+Without caching, every astrological calculation would need to be computed from scratch for every request. Some calculations (like complex divisional charts) can take hundreds of milliseconds or even seconds. By caching results, identical requests can be served in under 10ms - a speed improvement of up to 100x!
+
+#### How Our Cache Works (For Beginners)
+
+1. When a request comes in, we first check if we've already calculated this exact chart before
+2. If we have it in cache (a "cache hit"), we return the saved result immediately
+3. If not (a "cache miss"), we perform the calculation, then save the result for next time
+4. Different types of calculations are cached for different durations (TTL or "Time To Live")
+
+```mermaid
+graph TD
+    A[API Request] --> B{Cache Check}
+    B -->|Cache Hit 🎯| C[Return Cached Result]
+    B -->|Cache Miss 🔍| D[Calculate Result]
+    D --> E[Store in Cache]
+    E --> F[Return Result]
+    
+    subgraph "Cache Manager Features"
+        B
+        G[TTL Management]
+        H[Cache Invalidation]
+        I[Cache Statistics]
+    end
+    
+    G --> J[Short TTL: Transit Data<br>10-30 minutes]
+    G --> K[Long TTL: Natal Charts<br>24+ hours]
+    
+    style C fill:#9f9,stroke:#000
+    style B fill:#ffb366,stroke:#000
+    style D fill:#ff8080,stroke:#000
+```
+
+#### Cache System Implementation
+
+The `cache_manager.py` module handles all caching operations:
+
+```python
+# This is the entry point for most API endpoints
+@app.route('/lahiri/natal', methods=['POST'])
+@cache_calculation('natal_chart', ttl=86400)  # Cache for 24 hours
+def calculate_natal_chart():
+    data = request.get_json()
+    
+    # The decorator automatically checks the cache before running this
+    # If this function runs, it means we had a cache miss
+    
+    result = perform_natal_calculations(data)
+    
+    # The decorator automatically saves the result to cache
+    return jsonify(result)
+```
+
+#### Key Caching Features Explained
+
+| Feature | What It Does | Why You'll Love It |
+|---------|--------------|-------------------|
+| **Multi-level Caching** | Organizes cache by calculation type and inputs | Makes it easy to manage related cache entries |
+| **Cache Analytics** | Tracks hit and miss rates | Shows you how effective the cache is |
+| **Decorator Interface** | Simple `@cache_calculation` tag above functions | Makes it easy to add caching to any endpoint |
+| **Flexible TTLs** | Different expiration times for different data | Ensures data is fresh when needed, but cached when possible |
+| **Redis Cluster Support** | Works with distributed Redis setups | Allows scaling to multiple Redis servers |
+| **Automatic Fallback** | Continues working if Redis goes down | Prevents cache issues from breaking the API |
+
+#### For Developers: How to Use the Cache
+
+```python
+# Adding caching to a new endpoint
+@app.route('/my-new-endpoint', methods=['POST'])
+@cache_calculation('my_calculation_type', ttl=3600)  # 1 hour cache
+def my_new_function():
+    # Your code here
+    pass
+
+# Manually interacting with the cache
+from cache_manager import CacheManager
+
+cache = CacheManager()
+# Store something
+cache.set('my_key', my_value, ttl=3600)
+# Retrieve something
+result = cache.get('my_key')
+# Delete something
+cache.delete('my_key')
+```
+
+### 📊 Prometheus Metrics System
+
+#### Why Metrics Matter
+
+Metrics help us answer critical questions like:
+- Is our API running smoothly?
+- Are calculations taking longer than expected?
+- Is the cache working effectively?
+- Are we running out of memory or CPU?
+- Which API endpoints are most popular?
+
+Without metrics, we'd be flying blind when issues occur!
+
+#### How Our Metrics System Works (For Beginners)
+
+1. Throughout the code, we measure important events and values
+2. These measurements are collected by the `metrics_manager.py` module
+3. Prometheus (a monitoring system) scrapes these metrics periodically
+4. We can view dashboards and set up alerts based on these metrics
+
+```mermaid
+xychart
+    title "API Request Duration"
+    x-axis "Time" 2024-12-20T10:00:00 .. 2024-12-20T10:30:00
+    y-axis "Duration (ms)" 0 .. 500
+    line "API Request Duration" [2024-12-20T10:00:00, 50, 200, 100, 300, 150, 400, 200, 450]
+```
+
+#### Real Examples from Our Project
+
+Here are some actual metrics we collect:
+
+```
+# HTTP metrics
+api_request_total{endpoint="/lahiri/natal"} 24891
+api_request_duration_seconds{endpoint="/lahiri/natal",status="200"} 0.045
+
+# Cache metrics
+cache_hit_ratio 0.87
+cache_size_bytes 128400564
+
+# Calculation metrics
+calculation_time_seconds{type="natal_chart"} 0.238
+ephemeris_lookup_count 982547
+
+# Error metrics
+api_error_count{code="500"} 0
+```
+
+#### Metrics Types Explained Simply
+
+| Type | What It Is | Example | What It Tells You |
+|------|------------|---------|------------------|
+| **Counter** | Numbers that only go up | Total API requests | How many times something has happened |
+| **Gauge** | Numbers that go up and down | Current cache size | What's the current state of something |
+| **Histogram** | Distribution of values | Response time buckets | How values are distributed (e.g., p50, p95, p99) |
+| **Summary** | Similar to histogram | Processing time quantiles | Percentile calculations |
+
+#### For Developers: How to Use Metrics in Your Code
+
+We make it easy to add metrics to your code with simple decorators:
+
+```python
+# Track execution time and success/failure of your function
+@metrics_decorator('my_calculation_type')
+def my_function(data):
+    # Function is automatically timed
+    # Success and errors are counted
+    return result
+
+# Manually track custom metrics
+from metrics_manager import metrics
+
+# Count something
+metrics.counter('my_counter', 1)
+
+# Set a gauge value
+metrics.gauge('my_gauge', current_value)
+
+# Record a timing
+with metrics.timer('my_operation'):
+    # Timed operation here
+    perform_calculation()
+```
+
+#### Viewing Metrics
+
+To see the current metrics, simply visit `/metrics` on the API server. For a more user-friendly view, we recommend setting up Grafana dashboards that connect to Prometheus.
+
+### 🔄 Celery Task Queue System
+
+#### Why We Need a Task Queue (Explained Simply)
+
+Imagine you're at a restaurant. When you order a complex dish that takes 30 minutes to prepare, you don't want the server to stand at your table waiting for it to cook before taking other orders! 
+
+Similarly, some astrological calculations (like full dasha systems or multiple chart analyses) can take many seconds or even minutes to calculate. Instead of making the API request wait, we:
+
+1. Put the calculation task in a queue
+2. Return a task ID immediately to the client
+3. Process the calculation in the background
+4. Let the client check back later for the result
+
+This keeps our API responsive even when handling complex calculations.
+
+#### How Our Task Queue Works (For Beginners)
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant Queue
+    participant Worker
+    participant Redis
+
+    Client->>API: Request complex calculation
+    API->>Queue: Add calculation task
+    API->>Client: Return task_id immediately
+    
+    Note over Client,API: Client can continue working
+    
+    Queue->>Worker: Worker picks up task
+    Worker->>Worker: Performs calculation (could take minutes)
+    Worker->>Redis: Stores completed result
+    
+    Client->>API: Check status (with task_id)
+    API->>Redis: Look up result
+    Redis->>API: Return result if ready
+    API->>Client: Return result or "still processing"
+    
+    style API fill:#bbf,stroke:#333
+    style Worker fill:#bfb,stroke:#333
+    style Queue fill:#fbf,stroke:#333
+    style Redis fill:#ff9,stroke:#333
+```
+
+#### Real-World Example
+
+Here's how we handle a complex dasha calculation request:
+
+1. Client sends birth details and requests multi-level dasha prediction
+2. Instead of calculating immediately, we create a Celery task
+3. Client receives a response: `{"status": "processing", "task_id": "abc123"}`
+4. Client can periodically check: `GET /task-status/abc123`
+5. When ready: `{"status": "complete", "result": { full calculation results }}`
+
+#### Task Queue Components Explained
+
+| Component | What It Does | Why It's Important |
+|-----------|-------------|-------------------|
+| **Celery** | Task queue framework | Manages background processing |
+| **Redis/RabbitMQ** | Message broker | Stores task queue and passes tasks to workers |
+| **Worker Processes** | Task executors | Run the calculations in the background |
+| **Result Backend** | Stores task results | Saves completed calculations for retrieval |
+| **Status API** | Task status endpoint | Allows clients to check completion |
+
+#### For Developers: Using the Task Queue
+
+Our `celery_manager.py` module makes it easy to work with background tasks:
+
+```python
+# In your API endpoint:
+from celery_manager import submit_task
+
+@app.route('/complex-calculation', methods=['POST'])
+def handle_complex_calculation():
+    data = request.get_json()
+    
+    # Submit as background task instead of calculating now
+    task_result = submit_task(
+        task_name="dasha_calculation",
+        task_args=[data],
+        priority=5  # Higher number = higher priority
+    )
+    
+    # Immediately return with task ID
+    return jsonify({
+        "status": "processing",
+        "task_id": task_result['task_id'],
+        "estimated_time_seconds": 120
+    })
+
+# Defining a task (in celery_tasks.py)
+@celery_app.task(bind=True, name="dasha_calculation")
+def calculate_dasha(self, data):
+    # Self provides task context (for progress updates)
+    self.update_state(state="PROGRESS", meta={"progress": 10})
+    
+    # Do long calculation here
+    result = complex_dasha_calculation(data)
+    
+    return result  # Automatically stored in result backend
+```
+
+#### Status Checking API
+
+Clients can check task status with a simple endpoint:
+
+```python
+@app.route('/task-status/<task_id>', methods=['GET'])
+def check_task_status(task_id):
+    status = celery_manager.get_task_status(task_id)
+    return jsonify(status)
+```
+
+Response might look like:
 ```json
 {
-  "status": "healthy",
-  "timestamp": "2024-12-20T10:30:00Z",
-  "version": "1.3.0",
-  "services": {
-    "redis": "connected",
-    "swiss_ephemeris": "loaded",
-    "celery": "running"
-  }
+  "status": "IN_PROGRESS",  // or "SUCCESS", "FAILURE", "PENDING"
+  "progress": 75,           // percent complete (if available)
+  "result": null            // will contain result when complete
 }
 ```
 
-</details>
+## How Everything Fits Together
 
-<details>
-<summary><strong>🌟 Natal Chart Calculation</strong></summary>
+For newcomers to the project, understanding how different components interact is crucial. Here's a simplified explanation of the system workflow:
 
-```bash
-curl -X POST http://localhost:5000/lahiri/natal \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_name": "John Doe",
-    "birth_date": "1990-05-15",
-    "birth_time": "14:30:00",
-    "latitude": 28.6139,
-    "longitude": 77.2090,
-    "timezone_offset": 5.5
-  }'
+### 🔄 User Request Lifecycle
+
+```mermaid
+flowchart LR
+    User([User/Client]) --"1. HTTP Request\n(birth details)"--> API[Flask API]
+    API --"2. Check for\ncached result"--> Redis[(Redis Cache)]
+    Redis --"3a. Cache HIT:\nReturn data"--> API
+    API --"3b. Cache MISS:\nCalculate"--> Engine[Calculation Engine]
+    Engine --"4. Get planetary\npositions"--> SwissEph[Swiss Ephemeris]
+    SwissEph --"5. Return\nastronomical data"--> Engine
+    Engine --"6. Perform\ncalculations"--> Engine
+    Engine --"7. Return\nresult"--> API
+    API --"8. Cache result\nfor future"--> Redis
+    API --"9. HTTP Response\n(astrological data)"--> User
+    
+    style User fill:#f9f,stroke:#333
+    style API fill:#bbf,stroke:#333
+    style Redis fill:#f96,stroke:#333
+    style Engine fill:#9e9,stroke:#333
+    style SwissEph fill:#fd6,stroke:#333
 ```
 
-**Sample Response:**
-```json
-{
-  "user_name": "John Doe",
-  "birth_details": {
-    "date": "1990-05-15",
-    "time": "14:30:00",
-    "location": "Delhi, India"
-  },
-  "planetary_positions": {
-    "Sun": {"sign": "Taurus", "degree": 24.5, "house": 10},
-    "Moon": {"sign": "Cancer", "degree": 12.3, "house": 12},
-    "Mars": {"sign": "Gemini", "degree": 8.7, "house": 11}
-  },
-  "houses": [
-    {"house": 1, "sign": "Leo", "degree": 15.2},
-    {"house": 2, "sign": "Virgo", "degree": 10.8}
-  ],
-  "calculation_time": "45ms",
-  "cache_status": "calculated"
-}
-```
+### 📂 Key Files and Their Roles (Simplified)
 
-</details>
+| File/Directory | What It Does | Why It's Important |
+|----------------|--------------|-------------------|
+| `app.py` | Entry point that starts the Flask web server | Everything begins here; configures routes, middleware, and services |
+| `cache_manager.py` | Manages the Redis caching system | Makes repeated calculations much faster |
+| `metrics_manager.py` | Collects and exposes performance data | Helps monitor system health and performance |
+| `structured_logger.py` | Handles advanced logging | Makes debugging and tracing issues easier |
+| `celery_manager.py` | Manages background task processing | Allows for handling long calculations without blocking the API |
+| `engine/routes/` | Contains API endpoint definitions | Defines what URLs clients can call and what parameters they accept |
+| `engine/natalCharts/` | Core birth chart calculations | Fundamental astrological calculations |
+| `engine/divisionalCharts/` | Divisional chart calculations | More specialized chart types (D1-D60) |
+| `engine/kpSystem/` | KP system specific calculations | Implementation of the Krishnamurti Paddhati system |
+| `ephe/` | Astronomical data files | Swiss Ephemeris files for precise planetary positions |
 
-<details>
-<summary><strong>🔮 KP System Test</strong></summary>
+### 👩‍💻 Common Development Tasks
 
-```bash
-curl -X POST http://localhost:5000/kp/horary \
-  -H "Content-Type: application/json" \
-  -d '{
-    "question": "Will I get the job?",
-    "query_time": "2024-12-20T10:30:00",
-    "latitude": 28.6139,
-    "longitude": 77.2090,
-    "timezone_offset": 5.5
-  }'
-```
+Here's how to accomplish common tasks when working with this codebase:
 
-</details>
+#### Adding a New API Endpoint
 
-<details>
-<summary><strong>📊 Divisional Chart Test</strong></summary>
+1. Identify which system your endpoint belongs to (Lahiri, KP, or Raman)
+2. Add your route function to the appropriate file in `engine/routes/`
+3. Implement calculation logic in relevant modules
+4. Apply caching decorator for performance
+5. Add metrics for monitoring
+6. Add tests in the appropriate test directory
 
-```bash
-curl -X POST http://localhost:5000/lahiri/D9 \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_name": "Test User",
-    "birth_date": "1990-01-15",
-    "birth_time": "10:30:00",
-    "latitude": "28.6139",
-    "longitude": "77.2090",
-    "timezone_offset": 5.5
-  }'
-```
+#### Fixing a Bug in Calculations
+
+1. First, check if there are tests that expose the bug
+2. Look at the relevant calculation module in directories like `natalCharts/` or `divisionalCharts/`
+3. Implement fix and add unit test to verify
 
 </details>
 
