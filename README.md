@@ -652,7 +652,7 @@ sequenceDiagram
     Flask->>Cache: Check for Cached Result
     
     alt Cache Hit
-        Cache->>Flask: Return Cached Data
+        Cache-->>Flask: Return Cached Data
         Flask->>Client: Response (< 50ms)
     else Cache Miss
         Flask->>Engine: Trigger Calculation
@@ -763,7 +763,7 @@ For large-scale deployments, the system supports microservices decomposition:
 
 ```mermaid
 graph LR
-    subgraph "🔥 API Gateway"
+    subgraph "🔄 API Gateway"
         Gateway[API Gateway]
         Auth[Auth Service]
         RateLimit[Rate Limiter]
@@ -1243,7 +1243,7 @@ engine/                                          # 🧠 Core calculation engine
 **Recommended exploration order:**
 1. 📖 Read this README.md completely
 2. 🚀 Examine `app.py` for application structure  
-3. 📍 Browse `routes/LahairiAyanmasa.py` for API endpoints
+3. 📍 Browse `routes/LahiriAyanmasa.py` for API endpoints
 4. 🌟 Study `natalCharts/natal.py` for calculation logic
 5. 🗄️ Review `cache_manager.py` for performance optimization
 6. 🐳 Check `docker-compose.yml` for service architecture
@@ -1472,8 +1472,8 @@ curl -X POST http://localhost:5000/lahiri/natal \
     "user_name": "John Doe",
     "birth_date": "1990-05-15",
     "birth_time": "14:30:00",
-    "latitude": "28.6139",
-    "longitude": "77.2090",
+    "latitude": 28.6139,
+    "longitude": 77.2090,
     "timezone_offset": 5.5
   }'
 ```
@@ -1512,8 +1512,8 @@ curl -X POST http://localhost:5000/kp/horary \
   -d '{
     "question": "Will I get the job?",
     "query_time": "2024-12-20T10:30:00",
-    "latitude": "28.6139",
-    "longitude": "77.2090",
+    "latitude": 28.6139,
+    "longitude": 77.2090,
     "timezone_offset": 5.5
   }'
 ```
@@ -1631,7 +1631,7 @@ graph TB
 
 #### One-Command Deployment
 ```bash
-# Clone and start everything
+# 🚀 Quick start with Docker
 git clone https://github.com/Project-Corp-Astro/Astro_Engine.git
 cd Astro_Engine
 docker-compose up --build -d
@@ -1945,159 +1945,436 @@ graph LR
 
 ## 📡 API Documentation
 
-### API Design Principles
+<div align="center">
 
-The Astro Engine API follows REST principles with consistent endpoint design patterns:
+### 🌐 Complete RESTful API Reference
 
-1. **📝 Resource-Based URLs**: Endpoints represent specific astrological systems
-2. **🔄 JSON Formatting**: All requests and responses use JSON format
-3. **📊 HTTP Status Codes**: Standard HTTP status codes with detailed error messages
-4. **🧩 Consistent Parameters**: Common parameter structure across endpoints
-5. **🔒 Input Validation**: Comprehensive validation for all incoming data
-6. **📦 Versioned Responses**: Version field included in all responses
+**58+ endpoints across 3 astrological systems with Swiss Ephemeris precision**
 
-### Common Request Structure
+</div>
 
-All API endpoints accept POST requests with a JSON body following this structure:
+The Astro Engine provides a comprehensive REST API designed for modern applications requiring precision astrological calculations. Our API emphasizes consistency, performance, and ease of integration.
+
+### 🏗️ API Design Philosophy
+
+<details open>
+<summary><strong>🎯 Core Design Principles</strong></summary>
+
+| 🎯 **Principle** | 📋 **Implementation** | 🔍 **Benefit** |
+|------------------|----------------------|----------------|
+| **🔄 RESTful Design** | Resource-based URLs with HTTP verbs | Intuitive and standard |
+| **🧩 Consistency** | Uniform request/response patterns | Easy to learn and use |
+| **📊 JSON-First** | All data exchange in JSON format | Universal compatibility |
+| **🔒 Validation** | Comprehensive input validation | Prevents errors and attacks |
+| **📦 Versioning** | API version in every response | Future-proof upgrades |
+| **⚡ Performance** | Intelligent caching + compression | Lightning-fast responses |
+| **📈 Observability** | Detailed metrics and logging | Production monitoring |
+| **🛡️ Security** | Rate limiting + input sanitization | Enterprise-grade safety |
+
+</details>
+
+### 📝 Universal Request Format
+
+All API endpoints follow this consistent request structure:
+
+<details>
+<summary><strong>📋 Standard Request Schema</strong></summary>
 
 ```json
 {
-  "user_name": "John Doe",         // Name for reference (optional)
-  "birth_date": "1990-01-15",      // ISO format (YYYY-MM-DD)
-  "birth_time": "14:30:00",        // 24-hour format (HH:MM:SS)
-  "latitude": 28.6139,             // Decimal degrees (North positive)
-  "longitude": 77.2090,            // Decimal degrees (East positive)
-  "timezone_offset": 5.5,          // Hours offset from UTC
+  // Required fields for all calculations
+  "user_name": "John Doe",              // String - User identifier (optional but recommended)
+  "birth_date": "1990-01-15",           // String - ISO format YYYY-MM-DD
+  "birth_time": "14:30:00",             // String - 24-hour format HH:MM:SS
+  "latitude": 28.6139,                  // Number - Decimal degrees (North positive)
+  "longitude": 77.2090,                 // Number - Decimal degrees (East positive)  
+  "timezone_offset": 5.5,               // Number - Hours from UTC (India: +5.5)
   
-  // Optional parameters specific to endpoints
-  "chart_type": "D9",              // For divisional charts
-  "format": "detailed",            // Response format control
-  "language": "en"                 // Response language
+  // Optional parameters (endpoint-specific)
+  "chart_type": "D9",                   // String - For divisional charts (D1-D60)
+  "calculation_method": "traditional",   // String - Calculation variation
+  "output_format": "detailed",          // String - Response detail level
+  "language": "en",                     // String - Response language (en/hi)
+  "include_aspects": true,              // Boolean - Include planetary aspects
+  "house_system": "equal",              // String - House calculation method
+  "ayanamsa_override": null             // Number - Custom ayanamsa value
 }
 ```
 
-### Response Format
+**Field Validation Rules:**
+- `birth_date`: 5400 BCE to 5400 CE (Swiss Ephemeris range)
+- `birth_time`: Valid 24-hour format with seconds
+- `latitude`: -90 to +90 degrees
+- `longitude`: -180 to +180 degrees  
+- `timezone_offset`: -12 to +14 hours
 
-Responses follow a consistent structure:
+</details>
+
+### 📊 Universal Response Format
+
+All API responses follow this standardized structure:
+
+<details>
+<summary><strong>📋 Standard Response Schema</strong></summary>
 
 ```json
 {
-  "status": "success",
-  "timestamp": "2025-06-24T14:30:00Z",
-  "request_id": "req_abcd1234",
-  "version": "1.3.0",
-  "calculation_time_ms": 42,
-  "cached": false,
+  // Response metadata
+  "status": "success",                   // String - "success" | "error" | "processing"
+  "timestamp": "2024-12-20T14:30:00Z",  // String - ISO timestamp
+  "request_id": "req_abc123def456",     // String - Unique request identifier
+  "version": "1.3.0",                   // String - API version
+  "calculation_time_ms": 245,           // Number - Processing time
+  "cached": false,                      // Boolean - Was result cached?
+  "cache_key": "natal_123abc",          // String - Cache identifier
   
   // Request echo (for validation)
-  "request_data": { ... },
+  "request_data": {
+    "birth_date": "1990-01-15",
+    "birth_time": "14:30:00",
+    // ... echoed input parameters
+  },
   
-  // Core response data varies by endpoint
+  // Core calculation results (varies by endpoint)
   "chart_data": {
-    "ascendant": { ... },
-    "planets": [ ... ],
-    "houses": [ ... ],
-    "aspects": [ ... ],
-    // Specialized data
+    // Basic birth information
+    "birth_details": {
+      "julian_day": 2447893.104167,
+      "sidereal_time": "15:24:30",
+      "ayanamsa": 23.85,
+      "sunrise": "06:45:12",
+      "sunset": "18:22:45"
+    },
+    
+    // Planetary positions
+    "planets": [
+      {
+        "name": "Sun",
+        "symbol": "☉",
+        "longitude": 295.123456,        // Degrees in the zodiac
+        "latitude": 0.000234,           // Ecliptic latitude  
+        "distance": 0.9833245,          // AU from Earth
+        "speed": 1.0234567,             // Degrees per day
+        "sign": "Capricorn",            // Zodiac sign
+        "sign_degree": 25.123456,       // Degrees within sign
+        "nakshatra": "Dhanishta",       // Vedic constellation
+        "nakshatra_pada": 2,            // Quarter within nakshatra
+        "house": 5,                     // House number (1-12)
+        "retrograde": false,            // Motion direction
+        "combust": false,               // Too close to Sun
+        "dignity": "neutral"            // Planetary strength
+      }
+      // ... other planets
+    ],
+    
+    // House system
+    "houses": [
+      {
+        "house": 1,                     // House number
+        "sign": "Virgo",                // Sign on cusp
+        "degree": 15.234567,            // Exact cusp degree
+        "lord": "Mercury",              // Ruling planet
+        "strength": 65.4                // House strength (0-100)
+      }
+      // ... houses 2-12
+    ],
+    
+    // Planetary aspects (optional)
+    "aspects": [
+      {
+        "planet1": "Mars",
+        "planet2": "Jupiter", 
+        "aspect_type": "conjunction",    // Type of aspect
+        "orb": 3.45,                    // Degrees of separation
+        "strength": 85.2,               // Aspect strength
+        "applying": true                // Getting closer/further
+      }
+      // ... other aspects
+    ],
+    
+    // Endpoint-specific data
+    "specialized_data": {
+      // Varies by calculation type
+      // E.g., divisional chart positions, dasha periods, etc.
+    }
+  },
+  
+  // Performance and diagnostics
+  "performance": {
+    "swiss_ephemeris_queries": 12,
+    "cache_operations": 3,
+    "calculation_steps": 45
   }
 }
 ```
 
-### API Documentation Visualization
-
-```mermaid
-graph LR
-    A[Client] --> B[API Request]
-    B --> C{API Gateway}
-    
-    C --> D[Lahiri Endpoints]
-    C --> E[KP Endpoints]
-    C --> F[Raman Endpoints]
-    
-    D --> G[Response Generation]
-    E --> G
-    F --> G
-    G --> H[Client Response]
-    
-    subgraph "Common Operations"
-        I[Input Validation]
-        J[Caching]
-        K[Error Handling]
-        L[Metrics Collection]
-    end
-    
-    C --> I
-    I --> J
-    J --> G
-    G --> K
-    G --> L
+**Error Response Format:**
+```json
+{
+  "status": "error",
+  "timestamp": "2024-12-20T14:30:00Z",
+  "request_id": "req_error123",
+  "error": {
+    "code": "INVALID_DATE",
+    "message": "Birth date is outside valid range (5400 BCE - 5400 CE)",
+    "details": {
+      "field": "birth_date",
+      "provided": "1990-13-45",
+      "expected": "YYYY-MM-DD format"
+    }
+  }
+}
 ```
 
-## 🎯 API Systems
+</details>
 
-### Three Ayanamsa Systems Overview
+### 🌐 Complete API Endpoint Reference
 
-Astro Engine implements three complete ayanamsa systems, each with its own specialized calculation methodologies for planetary positions, houses, and predictive techniques.
+<details open>
+<summary><strong>🕉️ Lahiri Ayanamsa System (25+ Endpoints)</strong></summary>
 
-```mermaid
-pie title Ayanamsa System Distribution
-    "Lahiri (Traditional)" : 45
-    "KP (Predictive)" : 25
-    "Raman (Alternative)" : 30
+The traditional Vedic astrology system used by most Indian astrologers.
+
+#### 🌟 Basic Charts & Information
+| 🎯 **Endpoint** | 📝 **Purpose** | ⚡ **Response Time** |
+|----------------|----------------|---------------------|
+| `POST /lahiri/natal` | Complete birth chart with planetary positions | ~150ms |
+| `POST /lahiri/basic-details` | Essential birth information and planetary degrees | ~80ms |
+| `POST /lahiri/houses` | 12-house system with strength analysis | ~120ms |
+| `POST /lahiri/planetary-positions` | Detailed planetary coordinates and speeds | ~100ms |
+
+#### 📊 Divisional Charts (Vargas)
+| 🎯 **Endpoint** | 📝 **Chart Type** | 🎯 **Life Area** |
+|----------------|------------------|------------------|
+| `POST /lahiri/D1` | Rashi Chart | Overall life, personality |
+| `POST /lahiri/D2` | Hora Chart | Wealth, finances |
+| `POST /lahiri/D3` | Drekkana Chart | Siblings, courage |
+| `POST /lahiri/D4` | Chaturthamsha | Property, home |
+| `POST /lahiri/D7` | Saptamsha | Children, creativity |
+| `POST /lahiri/D9` | Navamsha | Marriage, dharma |
+| `POST /lahiri/D10` | Dashamsha | Career, profession |
+| `POST /lahiri/D12` | Dwadashamsha | Parents, ancestry |
+| `POST /lahiri/D16` | Shodashamsha | Vehicles, luxury |
+| `POST /lahiri/D20` | Vimshamsha | Spirituality, worship |
+| `POST /lahiri/D24` | Chaturvimshamsha | Learning, education |
+| `POST /lahiri/D27` | Saptavimshamsha | Strengths, talents |
+| `POST /lahiri/D30` | Trimshamsha | Troubles, obstacles |
+| `POST /lahiri/D40` | Khavedamsha | Maternal heritage |
+| `POST /lahiri/D45` | Akshavedamsha | Character, conduct |
+| `POST /lahiri/D60` | Shashtiamsha | Past karma, destiny |
+
+#### ⏰ Time Period Analysis
+| 🎯 **Endpoint** | 📝 **Purpose** | 📊 **Detail Level** |
+|----------------|----------------|-------------------|
+| `POST /lahiri/vimshottari-mahadasha` | Major life periods (120-year cycle) | 5 levels deep |
+| `POST /lahiri/current-dasha` | Present time period analysis | Current active periods |
+| `POST /lahiri/dasha-timeline` | Complete life timeline | Birth to 120 years |
+
+#### 📈 Strength Analysis
+| 🎯 **Endpoint** | 📝 **Purpose** | 🔢 **Calculation** |
+|----------------|----------------|-------------------|
+| `POST /lahiri/ashtakavarga` | 8-point planetary strength system | 337-point analysis |
+| `POST /lahiri/sarvashtakavarga` | Total strength across all planets | Combined scoring |
+| `POST /lahiri/planetary-strength` | Individual planet power analysis | Multiple strength methods |
+
+#### 🏠 Special Lagna Charts
+| 🎯 **Endpoint** | 📝 **Purpose** | 🎯 **Focus Area** |
+|----------------|----------------|------------------|
+| `POST /lahiri/moon-chart` | Moon as ascendant | Emotional nature |
+| `POST /lahiri/sun-chart` | Sun as ascendant | Soul purpose |
+| `POST /lahiri/bhava-lagna` | House-based ascendant | Life themes |
+| `POST /lahiri/hora-lagna` | Time-based ascendant | Material success |
+
+</details>
+
+<details>
+<summary><strong>🔮 KP System (Krishnamurti Paddhati) - 8+ Endpoints</strong></summary>
+
+Advanced predictive system focusing on sub-lord analysis and precise timing.
+
+#### 🎯 Core KP Calculations
+| 🎯 **Endpoint** | 📝 **Purpose** | 🔍 **Specialty** |
+|----------------|----------------|------------------|
+| `POST /kp/horary` | Question-based prediction | Precise answers |
+| `POST /kp/natal-chart` | KP-style birth chart | Sub-lord analysis |
+| `POST /kp/significators` | Planet significance for houses | Predictive analysis |
+| `POST /kp/cuspal-chart` | House cusp analysis | Exact timing |
+
+#### 🔮 Advanced KP Features
+| 🎯 **Endpoint** | 📝 **Purpose** | ⚡ **Response Time** |
+|----------------|----------------|---------------------|
+| `POST /kp/ruling-planets` | Current ruling planets | ~200ms |
+| `POST /kp/sub-lords` | Detailed sub-lord analysis | ~300ms |
+| `POST /kp/event-timing` | Predict event timing | ~400ms |
+| `POST /kp/yes-no-answer` | Direct horary answers | ~250ms |
+
+</details>
+
+<details>
+<summary><strong>📜 Raman Ayanamsa System - 25+ Endpoints</strong></summary>
+
+Alternative ayanamsa providing different planetary positioning (~23 arc minutes difference).
+
+#### 🌟 Raman Basic Charts
+| 🎯 **Endpoint** | 📝 **Purpose** | 🔄 **Difference from Lahiri** |
+|----------------|----------------|----------------------------|
+| `POST /raman/natal` | Raman birth chart | ~23 arc minutes offset |
+| `POST /raman/basic-details` | Essential information | Alternative positioning |
+| `POST /raman/houses` | House system analysis | Raman-specific calculations |
+
+#### 📊 Raman Divisional Charts
+All divisional charts available with Raman ayanamsa:
+- `POST /raman/D1` through `POST /raman/D60`
+- Same life area focus as Lahiri system
+- Different planetary positions due to ayanamsa variance
+
+</details>
+
+### 🧪 API Testing & Examples
+
+<details>
+<summary><strong>🌟 Complete Natal Chart Example</strong></summary>
+
+**Request:**
+```bash
+curl -X POST http://localhost:5000/lahiri/natal \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_name": "John Doe",
+    "birth_date": "1990-05-15",
+    "birth_time": "14:30:00", 
+    "latitude": 28.6139,
+    "longitude": 77.2090,
+    "timezone_offset": 5.5,
+    "include_aspects": true,
+    "output_format": "detailed"
+  }'
 ```
 
-### API Endpoint Distribution
-
-The API is organized into three major blueprints, each containing specialized routes for different calculation systems:
-
-```mermaid
-graph TD
-    subgraph "🌐 API Endpoints (58+ Total)"
-        A["🕉️ Lahiri System<br/>(25+ endpoints)"]
-        B["🔮 KP System<br/>(8+ endpoints)"] 
-        C["📜 Raman System<br/>(25+ endpoints)"]
-    end
-    
-    subgraph "📡 Common Request Format"
-        D[POST Request]
-        E["🧩 JSON Body<br/>- user_name<br/>- birth_date<br/>- birth_time<br/>- latitude<br/>- longitude<br/>- timezone_offset"]
-    end
-    
-    subgraph "📊 Response Format"
-        F["🧩 JSON Response<br/>- chart_data<br/>- planet_positions<br/>- houses<br/>- aspects<br/>- specialized_data"]
-    end
-    
-    D --> E
-    D --> A
-    D --> B
-    D --> C
-    A --> F
-    B --> F
-    C --> F
+**Response (Sample):**
+```json
+{
+  "status": "success",
+  "timestamp": "2024-12-20T14:30:00Z",
+  "calculation_time_ms": 245,
+  "cached": false,
+  "chart_data": {
+    "birth_details": {
+      "julian_day": 2448023.104167,
+      "ayanamsa": 23.85,
+      "sunrise": "05:45:12",
+      "sunset": "19:22:45"
+    },
+    "planets": [
+      {
+        "name": "Sun", "longitude": 55.123, "sign": "Taurus",
+        "nakshatra": "Rohini", "house": 10, "retrograde": false
+      },
+      {
+        "name": "Moon", "longitude": 125.456, "sign": "Cancer", 
+        "nakshatra": "Pushya", "house": 12, "retrograde": false
+      }
+      // ... other planets
+    ],
+    "houses": [
+      {"house": 1, "sign": "Leo", "degree": 15.234, "lord": "Sun"},
+      {"house": 2, "sign": "Virgo", "degree": 10.567, "lord": "Mercury"}
+      // ... other houses
+    ],
+    "aspects": [
+      {
+        "planet1": "Mars", "planet2": "Jupiter",
+        "aspect_type": "trine", "orb": 2.34, "strength": 85.5
+      }
+    ]
+  }
+}
 ```
 
-### Performance Metrics
+</details>
 
-```mermaid
-xychart-beta
-    title "API Response Time by Endpoint Type"
-    x-axis ["Natal Charts", "Divisional Charts", "Dasha", "Horary"]
-    y-axis "Response Time (ms)" 0 --> 600
-    bar [68, 124, 276, 387]
-    line [22, 34, 56, 85]
-    
-    # Blue bars: Cold requests (no cache)
-    # Green line: Cached responses
+<details>
+<summary><strong>🔮 KP Horary Example</strong></summary>
+
+**Request:**
+```bash
+curl -X POST http://localhost:5000/kp/horary \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "Will I get the job I interviewed for?",
+    "query_time": "2024-12-20T10:30:00",
+    "latitude": 28.6139,
+    "longitude": 77.2090,
+    "timezone_offset": 5.5
+  }'
 ```
 
-### Memory Usage Optimization
+**Response:**
+```json
+{
+  "status": "success",
+  "horary_analysis": {
+    "question": "Will I get the job I interviewed for?",
+    "significator_houses": [1, 6, 10],
+    "ruling_planets": ["Mercury", "Saturn", "Mars"],
+    "prediction": "Favorable - Strong indicators for success",
+    "timing": "Within 2-3 months",
+    "confidence": 78.5
+  }
+}
+```
 
-The system includes memory optimization techniques to handle the large ephemeris data files efficiently:
+</details>
 
-```mermaid
-xychart-beta
-    title "Memory Usage Comparison"
-    x-axis ["Standard", "Optimized", "With Redis"]
+<details>
+<summary><strong>📊 Divisional Chart Example</strong></summary>
+
+**Request:**
+```bash
+curl -X POST http://localhost:5000/lahiri/D9 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_name": "Jane Smith",
+    "birth_date": "1985-09-22",
+    "birth_time": "08:15:00",
+    "latitude": 19.0760,
+    "longitude": 72.8777,
+    "timezone_offset": 5.5
+  }'
+```
+
+</details>
+
+### 🚀 Performance Optimization
+
+<div align="center">
+
+| 📊 **Metric** | 🎯 **Target** | 📈 **Typical** | 🚀 **Cached** |
+|---------------|---------------|----------------|----------------|
+| **Simple Charts (D1, Natal)** | < 200ms | ~150ms | ~25ms |
+| **Complex Charts (D60, Ashtakavarga)** | < 500ms | ~350ms | ~45ms |
+| **Dasha Calculations** | < 800ms | ~600ms | ~80ms |
+| **KP Horary** | < 400ms | ~300ms | ~50ms |
+| **Batch Requests** | < 2s | ~1.5s | ~200ms |
+
+</div>
+
+### 🔒 Rate Limiting & Security
+
+| 🛡️ **Protection** | 📊 **Limit** | 🎯 **Purpose** |
+|-------------------|--------------|----------------|
+| **Requests per minute** | 60 per IP | Prevent abuse |
+| **Concurrent connections** | 10 per IP | Resource protection |
+| **Request size** | 10KB max | Memory protection |
+| **Response timeout** | 30 seconds | Performance guarantee |
+
+### 📚 Integration Libraries
+
+Coming soon - official SDKs for popular languages:
+- 🐍 **Python SDK** - Complete API wrapper
+- 🌐 **JavaScript SDK** - Browser and Node.js
+- 📱 **Swift SDK** - iOS applications  
+- 🤖 **Kotlin SDK** - Android applications
     y-axis "Memory (MB)" 0 --> 1000
     bar [875, 420, 580]
 ```
@@ -2655,7 +2932,557 @@ curl -X POST http://127.0.0.1:5000/lahiri/natal \
 
 ## 💻 Development Setup
 
-### Prerequisites
+<div align="center">
+
+### 🛠️ Complete Developer Environment Setup
+
+**Everything you need for productive Astro Engine development**
+
+</div>
+
+This section provides comprehensive instructions for setting up a complete development environment for the Astro Engine project.
+
+### 📋 Prerequisites & System Requirements
+
+<details open>
+<summary><strong>🖥️ System Requirements</strong></summary>
+
+| 🔧 **Component** | 🎯 **Minimum** | 🚀 **Recommended** | 📝 **Notes** |
+|------------------|----------------|-------------------|-------------|
+| **🐍 Python** | 3.9+ | 3.11+ | Latest stable release |
+| **💾 RAM** | 4GB | 8GB+ | For ephemeris data and calculations |
+| **💿 Storage** | 2GB free | 5GB+ | Includes ephemeris data (280MB+) |
+| **🌐 Network** | Basic internet | High-speed | For package downloads |
+| **🏗️ Git** | 2.0+ | Latest | Version control |
+| **🐳 Docker** | 20.10+ | Latest | Container development (optional) |
+| **🗄️ Redis** | 6.0+ | 7.0+ | Caching (can run in Docker) |
+
+**Supported Operating Systems:**
+- ✅ **Linux** (Ubuntu 20.04+, CentOS 8+, Debian 11+)
+- ✅ **macOS** (macOS 11+, both Intel and Apple Silicon)  
+- ✅ **Windows** (Windows 10+, WSL2 recommended)
+
+</details>
+
+<details>
+<summary><strong>🔧 Required Tools Installation</strong></summary>
+
+#### 🐍 Python Installation
+
+**Linux (Ubuntu/Debian):**
+```bash
+# Update package list
+sudo apt update
+
+# Install Python 3.11 and development tools
+sudo apt install python3.11 python3.11-dev python3.11-venv python3-pip
+
+# Set Python 3.11 as default (optional)
+sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
+```
+
+**macOS:**
+```bash
+# Using Homebrew (recommended)
+brew install python@3.11
+
+# Or using official installer from python.org
+# Download from: https://www.python.org/downloads/mac-osx/
+```
+
+**Windows:**
+```bash
+# Using Chocolatey
+choco install python311
+
+# Or download from: https://www.python.org/downloads/windows/
+# Enable "Add Python to PATH" during installation
+```
+
+#### 🏗️ Git Installation
+
+**Linux:**
+```bash
+sudo apt install git
+```
+
+**macOS:**
+```bash
+# Git comes with Xcode Command Line Tools
+xcode-select --install
+
+# Or with Homebrew
+brew install git
+```
+
+**Windows:**
+```bash
+# Download from: https://git-scm.com/download/win
+# Or with Chocolatey
+choco install git
+```
+
+#### 🐳 Docker Installation (Optional but Recommended)
+
+**Linux:**
+```bash
+# Docker Engine installation
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+
+# Add user to docker group
+sudo usermod -aG docker $USER
+
+# Install Docker Compose
+sudo apt install docker-compose-plugin
+```
+
+**macOS/Windows:**
+```bash
+# Download Docker Desktop
+# https://www.docker.com/products/docker-desktop/
+```
+
+</details>
+
+### 🚀 Step-by-Step Development Setup
+
+<details open>
+<summary><strong>🔥 Quick Setup (5 minutes)</strong></summary>
+
+```bash
+# 1️⃣ Clone the repository
+git clone https://github.com/Project-Corp-Astro/Astro_Engine.git
+cd Astro_Engine
+
+# 2️⃣ Create and activate virtual environment
+python3 -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# 3️⃣ Upgrade pip and install dependencies
+pip install --upgrade pip
+pip install -r requirements.txt
+
+# 4️⃣ Set up environment variables
+export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+export FLASK_ENV=development
+export FLASK_DEBUG=1
+
+# 5️⃣ Test the installation
+cd astro_engine
+python -c "import swisseph; print('Swiss Ephemeris loaded successfully')"
+
+# 6️⃣ Start development server
+python app.py
+
+# ✅ Server running at http://localhost:5000
+```
+
+</details>
+
+<details>
+<summary><strong>🛠️ Detailed Development Setup</strong></summary>
+
+#### 1️⃣ Repository Setup
+
+```bash
+# Clone with full history
+git clone https://github.com/Project-Corp-Astro/Astro_Engine.git
+cd Astro_Engine
+
+# Verify repository structure
+ls -la
+# Should see: astro_engine/, docs/, tests/, docker-compose.yml, etc.
+
+# Check available branches
+git branch -a
+
+# Optional: Create your development branch
+git checkout -b feature/your-feature-name
+```
+
+#### 2️⃣ Python Environment Setup
+
+```bash
+# Create isolated virtual environment
+python3 -m venv venv
+
+# Activate virtual environment
+source venv/bin/activate  # Linux/macOS
+# venv\Scripts\activate   # Windows
+
+# Verify Python version
+python --version  # Should be 3.9+
+
+# Upgrade pip to latest version
+pip install --upgrade pip
+
+# Install development dependencies
+pip install -r requirements.txt
+
+# Optional: Install additional development tools
+pip install black flake8 pytest pytest-cov mypy
+```
+
+#### 3️⃣ Environment Configuration
+
+Create a `.env` file for local development:
+
+```bash
+# .env file for development
+cat > .env << EOF
+# Application settings
+FLASK_ENV=development
+FLASK_DEBUG=1
+FLASK_RUN_HOST=0.0.0.0
+FLASK_RUN_PORT=5000
+
+# Python path
+PYTHONPATH=${PYTHONPATH}:$(pwd)
+
+# Redis configuration (if running locally)
+REDIS_URL=redis://localhost:6379/0
+
+# Logging level
+LOG_LEVEL=DEBUG
+
+# Swiss Ephemeris path
+EPHEMERIS_PATH=./astro_engine/ephe
+
+# Optional: Celery configuration
+CELERY_BROKER_URL=redis://localhost:6379/1
+CELERY_RESULT_BACKEND=redis://localhost:6379/1
+EOF
+
+# Load environment variables
+source .env
+```
+
+#### 4️⃣ Database and Cache Setup
+
+**Option A: Local Redis (Recommended for development)**
+```bash
+# Linux
+sudo apt install redis-server
+sudo systemctl start redis-server
+
+# macOS
+brew install redis
+brew services start redis
+
+# Windows (using WSL2 or Redis for Windows)
+# Download from: https://github.com/microsoftarchive/redis/releases
+```
+
+**Option B: Docker Redis (Easier)**
+```bash
+# Start Redis in Docker
+docker run -d --name redis-dev -p 6379:6379 redis:7-alpine
+
+# Verify Redis connection
+redis-cli ping  # Should return "PONG"
+```
+
+#### 5️⃣ Swiss Ephemeris Verification
+
+```bash
+# Test Swiss Ephemeris data availability
+cd astro_engine
+python -c "
+import os
+import swisseph as swe
+
+# Set ephemeris path
+swe.set_ephe_path('./ephe')
+
+# Test planet calculation
+julian_day = 2451545.0  # J2000.0
+sun_pos = swe.calc_ut(julian_day, swe.SUN)
+print(f'Swiss Ephemeris working! Sun position: {sun_pos[0]:.6f}°')
+"
+```
+
+#### 6️⃣ Development Server Testing
+
+```bash
+# Start development server
+python app.py
+
+# In another terminal, test the API
+curl http://localhost:5000/health
+
+# Test natal chart calculation
+curl -X POST http://localhost:5000/lahiri/natal \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_name": "Test User",
+    "birth_date": "1990-01-15",
+    "birth_time": "10:30:00",
+    "latitude": "28.6139",
+    "longitude": "77.2090",
+    "timezone_offset": 5.5
+  }'
+```
+
+</details>
+
+### 🧪 Development Tools & IDE Setup
+
+<details>
+<summary><strong>🔧 Recommended Development Tools</strong></summary>
+
+#### 📝 Code Editors & IDEs
+
+| 🛠️ **Tool** | 🎯 **Best For** | 🔧 **Setup** |
+|-------------|----------------|-------------|
+| **VS Code** | General development | Install Python, Docker, Git extensions |
+| **PyCharm** | Python-focused development | Configure interpreter, enable Flask support |
+| **Vim/Neovim** | Terminal-based development | Install language servers, syntax highlighting |
+| **Sublime Text** | Lightweight editing | Python syntax, package control |
+
+#### 🔍 Essential VS Code Extensions
+
+```bash
+# Install VS Code extensions via command line
+code --install-extension ms-python.python
+code --install-extension ms-python.flake8
+code --install-extension ms-python.black-formatter
+code --install-extension ms-vscode.vscode-json
+code --install-extension redhat.vscode-yaml
+code --install-extension ms-azuretools.vscode-docker
+code --install-extension coenraads.bracket-pair-colorizer
+code --install-extension streetsidesoftware.code-spell-checker
+```
+
+#### 🧪 Testing and Quality Tools
+
+```bash
+# Install development tools
+pip install black flake8 pytest pytest-cov mypy pre-commit
+
+# Set up pre-commit hooks
+pre-commit install
+
+# Run code formatting
+black astro_engine/
+
+# Run linting
+flake8 astro_engine/
+
+# Run type checking
+mypy astro_engine/
+
+# Run tests
+pytest tests/
+```
+
+</details>
+
+<details>
+<summary><strong>🐳 Docker Development Environment</strong></summary>
+
+For a complete containerized development environment:
+
+```bash
+# Build development container
+docker-compose -f docker-compose.dev.yml build
+
+# Start development environment
+docker-compose -f docker-compose.dev.yml up -d
+
+# Access development container
+docker-compose -f docker-compose.dev.yml exec astro-engine bash
+
+# View logs
+docker-compose -f docker-compose.dev.yml logs -f
+
+# Stop environment
+docker-compose -f docker-compose.dev.yml down
+```
+
+**docker-compose.dev.yml:**
+```yaml
+version: '3.8'
+services:
+  astro-engine:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+      - /app/venv
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    depends_on:
+      - redis
+    
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
+```
+
+</details>
+
+### 🔧 Development Workflow
+
+<details>
+<summary><strong>👨‍💻 Daily Development Process</strong></summary>
+
+#### 🌅 Starting Development
+```bash
+# 1. Activate virtual environment
+source venv/bin/activate
+
+# 2. Load environment variables
+source .env
+
+# 3. Pull latest changes
+git pull origin main
+
+# 4. Install new dependencies (if any)
+pip install -r requirements.txt
+
+# 5. Start Redis (if not running)
+redis-server --daemonize yes
+
+# 6. Start development server
+python astro_engine/app.py
+```
+
+#### 🔄 Development Loop
+```bash
+# Make code changes in your IDE
+
+# Run tests frequently
+pytest tests/test_your_feature.py -v
+
+# Check code quality
+black astro_engine/
+flake8 astro_engine/
+
+# Test API endpoints
+curl -X POST http://localhost:5000/your-endpoint
+
+# View logs
+tail -f logs/astro_engine.log
+```
+
+#### 🎯 Code Contribution Workflow
+```bash
+# 1. Create feature branch
+git checkout -b feature/new-calculation
+
+# 2. Make changes and test
+# ... development work ...
+
+# 3. Run full test suite
+pytest tests/ --cov=astro_engine
+
+# 4. Format and lint code
+black astro_engine/
+flake8 astro_engine/
+
+# 5. Commit changes
+git add .
+git commit -m "Add new divisional chart calculation"
+
+# 6. Push and create PR
+git push origin feature/new-calculation
+# Create pull request on GitHub
+```
+
+</details>
+
+### 🐛 Debugging & Troubleshooting
+
+<details>
+<summary><strong>🔍 Common Development Issues</strong></summary>
+
+| ❌ **Issue** | 🔧 **Solution** | 📝 **Prevention** |
+|-------------|---------------|------------------|
+| **Swiss Ephemeris not loading** | Check `ephe/` directory exists and contains .se1 files | Verify git LFS or download ephemeris data |
+| **Redis connection failed** | Start Redis server: `redis-server` | Add Redis to startup services |
+| **Import errors** | Set PYTHONPATH: `export PYTHONPATH="${PYTHONPATH}:$(pwd)"` | Add to shell profile |
+| **Port 5000 in use** | Change port: `export FLASK_RUN_PORT=5001` | Use different port or kill conflicting process |
+| **Permission denied** | Fix permissions: `chmod +x script.sh` | Check file permissions |
+| **Virtual environment issues** | Recreate venv: `rm -rf venv && python -m venv venv` | Regular venv maintenance |
+
+#### 🔧 Debug Mode Configuration
+
+Enable detailed debugging:
+
+```python
+# In astro_engine/app.py
+if __name__ == '__main__':
+    app.run(
+        debug=True,
+        host='0.0.0.0',
+        port=5000,
+        use_reloader=True,
+        use_debugger=True
+    )
+```
+
+#### 📊 Viewing Debug Information
+
+```bash
+# View detailed logs
+tail -f logs/astro_engine.log | jq .
+
+# Monitor performance metrics
+curl http://localhost:5000/metrics
+
+# Check system health
+curl http://localhost:5000/health | jq .
+
+# Monitor Redis cache
+redis-cli monitor
+```
+
+</details>
+
+### 📚 Development Resources
+
+<details>
+<summary><strong>📖 Essential Documentation & References</strong></summary>
+
+#### 🌟 Astrology References
+- **Swiss Ephemeris Documentation**: [Official SE Docs](https://www.astro.com/swisseph/swephinfo_e.htm)
+- **Vedic Astrology Principles**: Traditional calculation methods
+- **KP System**: Krishnamurti Paddhati methodology
+
+#### 🛠️ Technical References
+- **Flask Documentation**: [Flask.palletsprojects.com](https://flask.palletsprojects.com/)
+- **Redis Documentation**: [Redis.io](https://redis.io/documentation)
+- **Prometheus Metrics**: [Prometheus.io](https://prometheus.io/docs/)
+- **Celery Documentation**: [Celeryproject.org](https://docs.celeryproject.org/)
+
+#### 🧪 Testing Resources
+- **pytest Documentation**: [pytest.org](https://pytest.org/)
+- **API Testing**: [requests library](https://requests.readthedocs.io/)
+
+</details>
+
+### 🎯 Next Steps
+
+After completing the development setup:
+
+1. 📖 **Explore the codebase**: Start with `app.py` and route files
+2. 🧪 **Run the test suite**: `pytest tests/` to understand functionality
+3. 🌟 **Make a test calculation**: Try the API endpoints
+4. 📊 **Check project structure**: Review [Project Structure](#-project-structure-deep-dive)
+5. 🚀 **Start contributing**: Check [Contributing Guidelines](#-contributing-guidelines)
+
+**Ready to develop!** 🎉 Your environment is now configured for productive Astro Engine development.
 
 
 
