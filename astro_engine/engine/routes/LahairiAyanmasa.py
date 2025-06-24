@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from datetime import datetime
-# import logging
+import logging
 # from venv import logger
 import swisseph as swe
 
@@ -49,28 +49,97 @@ from astro_engine.engine.natalCharts.MoonChart import  lahairi_moon_chart, valid
 from astro_engine.engine.numerology.ProgressChart import  lahairi_progress
 from astro_engine.engine.numerology.SynatryChart import analyze_house_overlays, calculate_aspects,  evaluate_nodal_connections, interpret_synastry, lahairi_synastry, validate_person_data
 
+# Import caching decorators
+try:
+    from ...cache_manager import cache_calculation
+    from ...metrics_manager import metrics_decorator
+    from ...structured_logger import structured_log_decorator
+except ImportError:
+    # Fallback if import fails
+    def cache_calculation(prefix, ttl=None):
+        def decorator(func):
+            return func
+        return decorator
+    
+    def metrics_decorator(calculation_type):
+        def decorator(func):
+            return func
+        return decorator
+    
+    def structured_log_decorator(calculation_type, log_inputs=True):
+        def decorator(func):
+            return func
+        return decorator
 
 bp = Blueprint('bp_routes', __name__)
 
 # Natal Chart
 @bp.route('/lahiri/natal', methods=['POST'])
+@cache_calculation('natal_chart', ttl=86400)  # 24 hour cache
+@metrics_decorator('natal_chart')
+@structured_log_decorator('natal_chart', log_inputs=True)
 def natal_chart():
     try:
+        from flask import current_app
+        import time
+        
+        # Get structured logger
+        logger = None
+        if hasattr(current_app, 'structured_logger'):
+            logger = current_app.structured_logger.get_logger('natal_chart_endpoint')
+        
+        # Record user interaction
+        if hasattr(current_app, 'metrics_manager'):
+            current_app.metrics_manager.record_user_interaction('chart_request', 'natal_chart')
+            current_app.metrics_manager.record_chart_request('natal', 'lahiri')
+        
         birth_data = request.get_json()
         if not birth_data:
+            if logger:
+                logger.warning("No JSON data provided in request")
             return jsonify({"error": "No JSON data provided"}), 400
 
         required = ['user_name', 'birth_date', 'birth_time', 'latitude', 'longitude', 'timezone_offset']
-        if not all(key in birth_data for key in required):
+        missing_fields = [field for field in required if field not in birth_data]
+        if missing_fields:
+            if logger:
+                logger.warning("Missing required parameters", missing_fields=missing_fields)
             return jsonify({"error": "Missing required parameters"}), 400
 
         latitude = float(birth_data['latitude'])
         longitude = float(birth_data['longitude'])
         if not (-90 <= latitude <= 90) or not (-180 <= longitude <= 180):
+            if logger:
+                logger.warning("Invalid coordinates", latitude=latitude, longitude=longitude)
             return jsonify({"error": "Invalid latitude or longitude"}), 400
 
+        if logger:
+            logger.info("Starting natal chart calculation",
+                       user_name=birth_data['user_name'],
+                       birth_date=birth_data['birth_date'],
+                       coordinates=f"{latitude},{longitude}")
+
+        # Record ephemeris access timing
+        ephemeris_start = time.time()
+        
         # Calculate chart data
         chart_data = lahairi_natal(birth_data)
+        
+        # Calculate complexity score (number of planets * aspects)
+        complexity_score = len(chart_data.get('planet_positions', {})) * 12  # 12 houses
+        
+        # Record ephemeris calculation time
+        ephemeris_duration = time.time() - ephemeris_start
+        if hasattr(current_app, 'metrics_manager'):
+            current_app.metrics_manager.record_ephemeris_calculation('natal_chart', ephemeris_duration)
+            current_app.metrics_manager.record_ephemeris_file_read('seas_*.se1', 'success')
+            current_app.metrics_manager.record_calculation_complexity('natal', complexity_score)
+
+        if logger:
+            logger.info("Natal chart calculation completed",
+                       ephemeris_duration=ephemeris_duration,
+                       planet_count=len(chart_data.get('planet_positions', {})),
+                       complexity_score=complexity_score)
 
         # Format planetary positions
         planetary_positions_json = {}
@@ -121,17 +190,35 @@ def natal_chart():
                 "house_system": "Whole Sign"
             }
         }
+        
+        if logger:
+            logger.info("Natal chart response prepared",
+                       response_size=len(str(response)),
+                       ascendant_sign=asc_sign)
+        
         return jsonify(response)
 
     except ValueError as ve:
+        if hasattr(current_app, 'metrics_manager'):
+            current_app.metrics_manager.record_error('ValueError', 'natal_chart')
+        if hasattr(current_app, 'structured_logger'):
+            current_app.structured_logger.log_error('ValueError', str(ve), 
+                                                   {'endpoint': 'natal_chart'})
         return jsonify({"error": f"Invalid input: {str(ve)}"}), 400
     except Exception as e:
+        if hasattr(current_app, 'metrics_manager'):
+            current_app.metrics_manager.record_error('Exception', 'natal_chart')
+        if hasattr(current_app, 'structured_logger'):
+            current_app.structured_logger.log_error('Exception', str(e), 
+                                                   {'endpoint': 'natal_chart'}, e)
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
 
 
 # Transit or Gochar Chart
 @bp.route('/lahiri/transit', methods=['POST'])
+@cache_calculation('transit_chart', ttl=3600)  # 1 hour cache (shorter for dynamic data)
+@metrics_decorator('transit_chart')
 def transit_chart():
     try:
         # Get JSON data from request
@@ -293,6 +380,8 @@ def calculate_d2_hora():
 # Dreshkana (D-3)
 
 @bp.route('/lahiri/calculate_d3', methods=['POST'])
+@cache_calculation('d3_chart', ttl=86400)  # 24 hour cache
+@metrics_decorator('d3_chart')
 def calculate_d3_chart_endpoint():
     """API endpoint to calculate D3 chart with retrograde status, nakshatras, and padas."""
     try:
@@ -314,7 +403,7 @@ def calculate_d3_chart_endpoint():
         return jsonify(d3_data), 200
 
     except Exception as e:
-        logger.error(f"Error in D3 chart calculation: {str(e)}")
+        logging.error(f"Error in D3 chart calculation: {str(e)}")
         return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 
@@ -376,7 +465,7 @@ def calculate_d7_chart_endpoint():
         return jsonify(response), 200
 
     except Exception as e:
-        logger.error(f"Error in D7 calculation: {str(e)}")
+        logging.error(f"Error in D7 calculation: {str(e)}")
         return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 
@@ -783,6 +872,8 @@ def calculate_d60():
 
 # Navamsa Chart D9
 @bp.route('/lahiri/navamsa', methods=['POST'])
+@cache_calculation('navamsa_chart', ttl=86400)  # 24 hour cache
+@metrics_decorator('navamsa_chart')
 def navamsa_chart():
     """API endpoint to calculate Navamsa (D9) chart with retrograde, nakshatras, and padas."""
     try:

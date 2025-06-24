@@ -4,16 +4,16 @@ from datetime import datetime
 import logging
 from venv import logger
 
-from astro_engine.engine.ashatakavargha.KpShodashVargha import CHARTS_kp, SIGNS_kp, get_sidereal_asc_kp, get_sidereal_positions_kp, julian_day_kp, local_to_utc_kp, varga_sign_kp
-from astro_engine.engine.dashas.KpAntar import calculate_maha_antar_dasha
-from astro_engine.engine.dashas.KpPran import calculate_maha_antar_pratyantar_pran_dasha
-from astro_engine.engine.dashas.KpPratyantar import calculate_maha_antar_pratyantar_dasha
-from astro_engine.engine.dashas.KpSookshma import calculate_maha_antar_pratyantar_sooksha_dashas
-from astro_engine.engine.kpSystem.KpHorary import KP_NEW_AYANAMSA, calc_vimshottari_dasha_path, check_radicality, check_void_of_course_moon, get_asc_from_horary_num, get_nakshatra_chain, get_ruling_planets, get_sign_lord, get_significators_expanded, house_cusps, julday_from_date_time, kp_timing_by_dasha_layers, planet_chain, planet_house_assignment, sign_deg, sub_lord_chain_judgment
-from astro_engine.engine.kpSystem.charts.BhavaHouses import calculate_bhava_houses_details
-from astro_engine.engine.kpSystem.charts.CupsalChart import ZODIAC_SIGNS, cupsal_assign_nakshatra_and_lords, cupsal_assign_planet_to_house, cupsal_calculate_ascendant_and_cusps, cupsal_calculate_kp_new_ayanamsa, cupsal_calculate_planet_positions, cupsal_calculate_significators, cupsal_format_dms, cupsal_get_julian_day
-from astro_engine.engine.kpSystem.charts.RulingPlanets import ruling_calculate_ascendant_and_cusps, ruling_calculate_balance_of_dasha, ruling_calculate_fortuna, ruling_calculate_jd, ruling_calculate_planet_positions, ruling_check_rahu_ketu, ruling_compile_core_rp, ruling_get_day_lord, ruling_get_details
-from astro_engine.engine.kpSystem.charts.SignificatorHouse import calculate_planets_significations
+from ..ashatakavargha.KpShodashVargha import CHARTS_kp, SIGNS_kp, get_sidereal_asc_kp, get_sidereal_positions_kp, julian_day_kp, local_to_utc_kp, varga_sign_kp
+from ..dashas.KpAntar import calculate_maha_antar_dasha
+from ..dashas.KpPran import calculate_maha_antar_pratyantar_pran_dasha
+from ..dashas.KpPratyantar import calculate_maha_antar_pratyantar_dasha
+from ..dashas.KpSookshma import calculate_maha_antar_pratyantar_sooksha_dashas
+from ..kpSystem.KpHorary import KP_NEW_AYANAMSA, calc_vimshottari_dasha_path, check_radicality, check_void_of_course_moon, get_asc_from_horary_num, get_nakshatra_chain, get_ruling_planets, get_sign_lord, get_significators_expanded, house_cusps, julday_from_date_time, kp_timing_by_dasha_layers, planet_chain, planet_house_assignment, sign_deg, sub_lord_chain_judgment
+from ..kpSystem.charts.BhavaHouses import calculate_bhava_houses_details
+from ..kpSystem.charts.CupsalChart import ZODIAC_SIGNS, cupsal_assign_nakshatra_and_lords, cupsal_assign_planet_to_house, cupsal_calculate_ascendant_and_cusps, cupsal_calculate_kp_new_ayanamsa, cupsal_calculate_planet_positions, cupsal_calculate_significators, cupsal_format_dms, cupsal_get_julian_day
+from ..kpSystem.charts.RulingPlanets import ruling_calculate_ascendant_and_cusps, ruling_calculate_balance_of_dasha, ruling_calculate_fortuna, ruling_calculate_jd, ruling_calculate_planet_positions, ruling_check_rahu_ketu, ruling_compile_core_rp, ruling_get_day_lord, ruling_get_details
+from ..kpSystem.charts.SignificatorHouse import calculate_planets_significations
 
 
 
