@@ -876,206 +876,418 @@ This architecture ensures the Astro Engine can handle everything from small pers
     Flask --> HealthChecks
 ```
 
-### Project Structure Overview
+## 📊 Project Structure Deep Dive
 
-Let's understand the project structure from both a high level and with specific detail. If you're new to the project, this will help you navigate the codebase effectively.
+<div align="center">
 
-#### Directory Structure Visualization
+### 🗂️ Complete Codebase Organization Guide
+
+**Understanding how 50+ files work together to create a powerful astrology engine**
+
+</div>
+
+This section provides a comprehensive overview of the project structure, helping developers understand how the codebase is organized and where to find specific functionality.
+
+### 🌐 High-Level Project Organization
 
 ```mermaid
-flowchart TD
-    Root["Astro_Engine/
-    Root Project Directory"]
+graph TB
+    subgraph "🏠 Root Level"
+        README[📖 README.md]
+        Docker[🐳 Docker Files]
+        Scripts[🛠️ Shell Scripts]
+        Configs[⚙️ Config Files]
+    end
     
-    Core["📱 astro_engine/
-    Core Application Code"]
+    subgraph "📱 Core Application (astro_engine/)"
+        App[🚀 app.py - Main Entry]
+        Cache[🗄️ cache_manager.py]
+        Metrics[📊 metrics_manager.py]
+        Logger[📝 structured_logger.py]
+        Celery[🔄 celery_manager.py]
+        Engine[🧠 engine/ Directory]
+        Ephe[🌍 ephe/ Swiss Data]
+    end
     
-    Engine["🧠 engine/
-    Calculation Engine"]
+    subgraph "🧠 Calculation Engine (engine/)"
+        Routes[📍 routes/ - API Endpoints]
+        Natal[🌟 natalCharts/]
+        Divisional[📊 divisionalCharts/]
+        Dashas[⏰ dashas/]
+        Lagna[🏠 lagnaCharts/]
+        Ashtaka[📈 ashatakavargha/]
+        KP[🔮 kpSystem/]
+        Numero[🧮 numerology/]
+        Raman[📜 ramanDivisionals/]
+    end
     
-    Docs["📚 docs/
-    Documentation"]
+    subgraph "🚀 Infrastructure"
+        Docs[📚 docs/]
+        Tests[🧪 tests/]
+        Deploy[☁️ deployment/]
+        Logs[📊 logs/]
+    end
     
-    Tests["🧪 tests/
-    Testing Suite"]
+    App --> Engine
+    Routes --> Natal
+    Routes --> Divisional
+    Routes --> KP
     
-    Scripts["🛠️ scripts/
-    Utility Scripts"]
-    
-    Config["⚙️ config/
-    Configuration"]
-    
-    Deploy["🚀 deployment/
-    Cloud Deployment"]
-    
-    Logs["📊 logs/
-    Application Logs"]
-    
-    Docker["🐳 Docker Files
-    Container Setup"]
-    
-    Env["🌍 Environment Config
-    .env files"]
-    
-    Root --> Core
-    Root --> Docs
-    Root --> Tests
-    Root --> Scripts
-    Root --> Config
-    Root --> Deploy
-    Root --> Logs
-    Root --> Docker
-    Root --> Env
-    
-    Core --> Engine
-    
-    style Root fill:#f9f,stroke:#333
-    style Core fill:#bbf,stroke:#333
-    style Engine fill:#bfb,stroke:#333
-    style Docker fill:#fbb,stroke:#333
+    style App fill:#ffebee
+    style Engine fill:#e8f5e8
+    style Routes fill:#e3f2fd
+    style Deploy fill:#fff3e0
 ```
 
-#### Detailed Directory Map
+### 📁 Detailed Directory Structure
+
+<details open>
+<summary><strong>🏠 Root Directory Structure</strong></summary>
 
 ```
-Astro_Engine/                      # 🏠 Root project directory
+Astro_Engine/                                    # 🏠 Root project directory
 │
-├── astro_engine/                  # 📱 Core application code
-│   │
-│   ├── app.py                     # 🚀 Main application entry point
-│   │                              #    Sets up Flask app, configures routes, middleware
-│   │                              #    FIRST FILE TO READ to understand the system!
-│   │
-│   ├── cache_manager.py           # 🗄️ Redis caching implementation
-│   │                              #    Handles all caching operations with Redis
-│   │
-│   ├── metrics_manager.py         # 📊 Prometheus metrics collection
-│   │                              #    Collects and exposes performance metrics
-│   │
-│   ├── structured_logger.py       # 📝 Advanced JSON-based logging
-│   │                              #    Handles structured logging with context
-│   │
-│   ├── celery_manager.py          # 🔄 Task queue manager
-│   │                              #    Interfaces with Celery for async tasks
-│   │
-│   ├── celery_tasks.py            # ⚡ Background task definitions
-│   │                              #    Contains all Celery task implementations
-│   │
-│   ├── requirements.txt           # 📋 Python dependencies
-│   │
-│   ├── ephe/                      # 🌍 Swiss Ephemeris data (280MB+)
-│   │                              #    ⚠️ Large astronomical data files
-│   │
-│   └── engine/                    # 🧠 Core calculation engine
-│       │
-│       ├── routes/                # 🌐 API endpoint definitions
-│       │   ├── LahairiAyanmasa.py # Lahiri system (25+ endpoints)
-│       │   ├── KpNew.py           # KP system (8+ endpoints)
-│       │   └── RamanAyanmasa.py   # Raman system (25+ endpoints)
-│       │
-│       ├── natalCharts/           # 🌟 Birth chart calculations
-│       │   ├── natal.py           # Core natal chart calculations
-│       │   └── ...
-│       │
-│       ├── divisionalCharts/      # 📊 D1-D60 divisional chart systems (16 chart types)
-│       │   ├── D1.py              # Rashi (main) chart
-│       │   ├── D9.py              # Navamsha chart
-│       │   └── ...                # D2, D3, D4, D7, D10, D12, etc.
-│       │
-│       ├── dashas/                # ⏰ Time period calculations
-│       │   ├── vimshottari.py     # Main dasha system
-│       │   └── ...
-│       │
-│       ├── lagnaCharts/           # 🏠 Ascendant calculations
-│       │
-│       ├── ashatakavargha/        # 📈 Strength analysis systems
-│       │
-│       ├── kpSystem/              # 🔮 Krishnamurti Paddhati specific
-│       │   ├── KPHorary.py        # Horary astrology
-│       │   └── ...
-│       │
-│       ├── numerology/            # 🧮 Numerological calculations
-│       │
-│       └── ramanDivisionals/      # 📜 Raman-specific divisional charts
+├── 📖 README.md                                 # This comprehensive documentation
+├── 📄 LICENSE                                   # MIT license file
+├── 🐳 Dockerfile                                # Production container build
+├── 🐳 docker-compose.yml                       # Multi-service orchestration  
+├── 🚫 .dockerignore                             # Docker ignore patterns
+├── 🚫 .gitignore                                # Git ignore patterns
+├── 📋 requirements.txt                          # Core Python dependencies
+├── 📋 requirements-prod.txt                     # Production-specific dependencies
 │
-├── docs/                          # � Documentation
-│   │
-│   ├── deployment/                # 🚀 Deployment guides
-│   ├── development/               # 🛠️ Developer documentation
-│   ├── planning/                  # 📋 Architecture documents
-│   ├── api/                       # 🌐 API documentation
-│   ├── architecture/              # 🏗️ System architecture
-│   └── tutorials/                 # 📖 How-to guides
+├── 🛠️ start_dev.sh                              # Development server startup script
+├── 🧪 test_production.sh                        # Production validation script
+├── 🔍 check_deployment_readiness.sh             # Deployment readiness checker
+├── 🐳 test_docker_setup.sh                      # Docker validation script
 │
-├── tests/                         # 🧪 Test suite
-│   │
-│   ├── test_api.py                # Main API test suite
-│   ├── integration/               # End-to-end tests
-│   ├── performance/               # Load and performance tests
-│   ├── validation/                # Data validation tests
-│   └── unit/                      # Unit tests by module
-│
-├── scripts/                       # �️ Utility scripts
-│   │
-│   ├── development/               # Local development helpers
-│   ├── deployment/                # Deployment automation
-│   ├── testing/                   # Test runners and helpers
-│   └── validation/                # Data validation tools
-│
-├── config/                        # ⚙️ Configuration files
-│   │
-│   ├── gunicorn.conf.py           # WSGI server configuration
-│   └── nginx.conf                 # Reverse proxy configuration
-│
-├── deployment/                    # ☁️ Cloud-specific deployment
-│   │
-│   ├── digitalocean-backup/       # DigitalOcean deployment
-│   └── google-cloud/              # Google Cloud Platform
-│       ├── deploy-gcp.sh          # Deployment script
-│       ├── Dockerfile.gcp         # GCP-specific container
-│       ├── cloudbuild.yaml        # CI/CD configuration
-│       ├── .env.gcp               # Environment variables
-│       ├── gcp-config.env         # GCP settings
-│       └── terraform/             # Infrastructure as code
-│
-├── logs/                          # � Application logs
-│   │
-│   ├── astro_engine.log           # Main application log
-│   ├── astro_engine_errors.log    # Error logs
-│   └── astro_engine_performance.log # Performance logs
-│
-├── Dockerfile                     # 🐳 Production container build
-├── docker-compose.yml             # Multi-service orchestration
-├── .dockerignore                  # Docker ignore patterns
-│
-├── requirements.txt               # Core dependencies
-└── requirements-prod.txt          # Production dependencies
+├── 📊 DEPLOYMENT_READY.md                       # Deployment status report
+├── 📊 DOCKER_VALIDATION_SUMMARY.md              # Docker testing report
+├── 📊 FUNCTIONALITY_VERIFICATION_REPORT.md      # Feature testing report
+└── 📊 PROJECT_ORGANIZATION.md                   # Project structure summary
 ```
 
-#### Key Files You Should Know
+</details>
 
-| File | What It Contains | Why It's Important |
-|------|------------------|-------------------|
-| `astro_engine/app.py` | Flask app setup, middleware, blueprints | Entry point to the application |
-| `astro_engine/engine/routes/LahairiAyanmasa.py` | Lahiri system API routes | Main API endpoints for traditional Vedic astrology |
-| `astro_engine/engine/routes/KpNew.py` | KP system API routes | Endpoints for Krishnamurti Paddhati system |
-| `astro_engine/engine/routes/RamanAyanmasa.py` | Raman API routes | Raman ayanamsa system endpoints |
-| `astro_engine/engine/natalCharts/natal.py` | Core natal chart calculations | Fundamental planetary calculations |
-| `astro_engine/cache_manager.py` | Redis cache implementation | Performance optimization through caching |
-| `astro_engine/metrics_manager.py` | Prometheus metrics | Monitoring and observability |
-| `astro_engine/structured_logger.py` | Advanced logging | Debugging and tracing capabilities |
-| `astro_engine/celery_manager.py` | Async task handling | Background processing for complex calculations |
-| `docker-compose.yml` | Container orchestration | Defines service configuration for Docker |
+<details>
+<summary><strong>📱 Core Application Directory (astro_engine/)</strong></summary>
 
-#### File Structure for New Developers
+```
+astro_engine/                                    # 📱 Core application code
+│
+├── 🚀 app.py                                    # Flask application entry point
+│   │                                            # - Sets up Flask app with blueprints
+│   │                                            # - Configures middleware (CORS, compression)
+│   │                                            # - Registers route handlers
+│   │                                            # - Initializes monitoring and caching
+│   │                                            # 🎯 START HERE to understand the system
+│
+├── 🏃‍♂️ __main__.py                              # Module execution entry point
+│   │                                            # - Enables `python -m astro_engine`
+│   │                                            # - Production startup configuration
+│
+├── 🗄️ cache_manager.py                          # Redis caching system
+│   │                                            # - Intelligent caching with TTL
+│   │                                            # - Cache invalidation strategies
+│   │                                            # - Performance optimization
+│
+├── 📊 metrics_manager.py                        # Prometheus metrics collection
+│   │                                            # - Custom metrics for astrology calculations
+│   │                                            # - Performance monitoring
+│   │                                            # - Singleton pattern implementation
+│
+├── 📝 structured_logger.py                      # Advanced JSON logging
+│   │                                            # - Correlation ID tracking
+│   │                                            # - Structured log formatting
+│   │                                            # - Log rotation and management
+│
+├── 🔄 celery_manager.py                         # Celery task queue manager
+│   │                                            # - Async task processing
+│   │                                            # - Background job management
+│   │                                            # - Redis broker integration
+│
+├── ⚡ celery_tasks.py                            # Background task definitions
+│   │                                            # - Long-running calculations
+│   │                                            # - Async chart generation
+│   │                                            # - Batch processing tasks
+│
+├── 📋 requirements.txt                          # Python dependencies
+│
+├── 🌍 ephe/                                     # Swiss Ephemeris data (280MB+)
+│   │                                            # ⚠️ Large astronomical data files
+│   ├── seas_*.se1                              # Planetary position data
+│   ├── seasm*.se1                              # Moon position data  
+│   └── astlistn.md                             # Ephemeris documentation
+│
+└── 🧠 engine/                                   # Core calculation engine
+    │                                            # (Detailed breakdown below)
+    └── ... (50+ calculation modules)
+```
 
-If you're new to the codebase, here's a suggested order to explore the files:
+</details>
 
-1. Start with `app.py` to understand the application setup
-2. Look at the route files in `engine/routes/` to see the API endpoints
-3. Examine `cache_manager.py` to understand the caching system
-4. Check out `natal.py` to see how astrological calculations work
-5. Review `docker-compose.yml` to understand the service architecture
+<details>
+<summary><strong>🧠 Calculation Engine Directory (engine/)</strong></summary>
+
+```
+engine/                                          # 🧠 Core calculation engine
+│
+├── 📍 routes/                                   # 🌐 API endpoint definitions
+│   │
+│   ├── 🕉️ LahairiAyanmasa.py                    # Lahiri system API (25+ endpoints)
+│   │   │                                        # - Traditional Vedic astrology
+│   │   │                                        # - Most widely used ayanamsa
+│   │   │                                        # - Complete birth chart analysis
+│   │   └── Endpoints: /natal, /D1-D60, /dasha, /ashtakavarga
+│   │
+│   ├── 🔮 KpNew.py                              # KP system API (8+ endpoints) 
+│   │   │                                        # - Krishnamurti Paddhati system
+│   │   │                                        # - Predictive astrology focus
+│   │   │                                        # - Horary calculations
+│   │   └── Endpoints: /horary, /kp-chart, /significators
+│   │
+│   └── 📜 RamanAyanmsa.py                       # Raman system API (25+ endpoints)
+│       │                                        # - Alternative ayanamsa calculation
+│       │                                        # - Different planetary positioning
+│       └── Endpoints: /natal, /D1-D60, /raman-dasha
+│
+├── 🌟 natalCharts/                              # Birth chart calculations
+│   │
+│   ├── 📊 natal.py                              # Core natal chart engine
+│   │   │                                        # - Planetary position calculations
+│   │   │                                        # - House system implementation
+│   │   │                                        # - Aspect calculations
+│   │
+│   ├── 🏠 houses.py                             # House calculation systems
+│   ├── 🌙 moon_chart.py                         # Moon-centric calculations
+│   ├── ☀️ sun_chart.py                          # Sun-centric calculations
+│   └── 📈 basic_details.py                      # Fundamental birth data
+│
+├── 📊 divisionalCharts/                         # D1-D60 divisional charts (16 types)
+│   │
+│   ├── 📊 D1.py                                 # Rashi chart (birth chart)
+│   ├── 🌙 D2.py                                 # Hora chart (wealth)
+│   ├── 👥 D3.py                                 # Drekkana chart (siblings)
+│   ├── 🏡 D4.py                                 # Chaturthamsha (property)
+│   ├── 👶 D7.py                                 # Saptamsha (children)
+│   ├── 💑 D9.py                                 # Navamsha (marriage/dharma)
+│   ├── 💼 D10.py                                # Dashamsha (career)
+│   ├── 👨‍👩‍👧‍👦 D12.py                               # Dwadashamsha (parents)
+│   ├── 🏆 D16.py                                # Shodashamsha (vehicles)
+│   ├── 🙏 D20.py                                # Vimshamsha (spirituality)
+│   ├── 💪 D24.py                                # Chaturvimshamsha (learning)
+│   ├── 😊 D27.py                                # Saptavimshamsha (strengths)
+│   ├── 🔮 D30.py                                # Trimshamsha (evils/troubles)
+│   ├── 👴 D40.py                                # Khavedamsha (maternal)
+│   ├── 🎭 D45.py                                # Akshavedamsha (character)
+│   └── 🌟 D60.py                                # Shashtiamsha (karmic/past)
+│
+├── ⏰ dashas/                                   # Time period calculations
+│   │
+│   ├── 🔄 vimshottari.py                        # Main dasha system (120 years)
+│   │   │                                        # - Mahadasha (major periods)
+│   │   │                                        # - Antardasha (sub-periods)
+│   │   │                                        # - Pratyantardasha (sub-sub periods)
+│   │   │                                        # - Sookshma (micro periods)
+│   │   │                                        # - Prana (tiny periods)
+│   │
+│   ├── 📊 dasha_calculations.py                 # Dasha mathematical engine
+│   ├── ⏱️ current_dasha.py                      # Present time period
+│   └── 🔮 future_periods.py                     # Upcoming time periods
+│
+├── 🏠 lagnaCharts/                              # Ascendant-based calculations
+│   │
+│   ├── 🌅 lagna_chart.py                        # Main ascendant chart
+│   ├── 🏡 bhava_lagna.py                        # House-based ascendant
+│   ├── ⏰ hora_lagna.py                         # Time-based ascendant
+│   ├── 🌙 moon_lagna.py                         # Moon-based ascendant
+│   └── 🔗 arudha_lagna.py                       # Illusory ascendant
+│
+├── 📈 ashatakavargha/                           # Strength analysis systems
+│   │
+│   ├── 📊 ashtakavarga.py                       # 8-point strength system
+│   ├── 🎯 sarvashtakavarga.py                   # Total strength (337 points)
+│   ├── 🔍 binnashtakavarga.py                   # Individual planet analysis
+│   └── 📈 strength_calculations.py              # Strength scoring algorithms
+│
+├── 🔮 kpSystem/                                 # Krishnamurti Paddhati
+│   │
+│   ├── 🎯 KPHorary.py                           # Question-based predictions
+│   ├── 🏠 KPHouses.py                           # Unequal house system
+│   ├── ⭐ star_lords.py                         # Nakshatra rulers
+│   ├── 📊 cuspal_analysis.py                    # House cusp calculations
+│   └── 🔍 significators.py                     # Planetary significance
+│
+├── 🧮 numerology/                               # Numerological systems
+│   │
+│   ├── 📊 chaldean.py                           # Chaldean numerology
+│   ├── 🎯 lo_shu_grid.py                        # 9-square analysis
+│   ├── 💑 compatibility.py                      # Relationship analysis
+│   └── 📱 mobile_numerology.py                  # Modern applications
+│
+├── 📜 ramanDivisionals/                         # Raman-specific charts
+│   │
+│   ├── 📊 raman_D1.py                           # Raman Rashi chart
+│   ├── 🌙 raman_D9.py                           # Raman Navamsha
+│   └── ... (other Raman divisional charts)
+│
+└── 📋 ApiEndPoints.txt                          # Complete API endpoint list
+```
+
+</details>
+
+<details>
+<summary><strong>🚀 Infrastructure & Support Directories</strong></summary>
+
+```
+📚 docs/                                         # Documentation
+│
+├── 📋 FINAL_ORGANIZATION_REPORT.md              # Project completion summary
+├── 📊 ORGANIZATION_SUMMARY.md                   # Structure overview
+├── ✅ PRODUCTION_CHECKLIST.md                   # Deployment checklist
+├── 🎉 PROJECT_COMPLETION.md                     # Milestone documentation
+│
+├── 🌐 api/                                      # API documentation
+├── 🏗️ architecture/                             # System design docs
+├── 🚀 deployment/                               # Deployment guides
+├── 🛠️ development/                              # Developer guides
+├── 📋 planning/                                 # Project planning
+└── 📖 tutorials/                                # How-to guides
+
+🧪 tests/                                        # Comprehensive test suite
+│
+├── 🧪 test_api.py                               # Main API integration tests
+├── 🔗 integration/                              # End-to-end testing
+│   ├── test_full_workflow.py                   # Complete user journeys
+│   └── test_system_integration.py              # Service integration
+├── ⚡ performance/                               # Load & performance tests
+│   ├── load_testing.py                         # High-volume testing
+│   └── benchmark_calculations.py               # Calculation speed tests
+├── ✅ validation/                               # Data validation tests
+│   ├── test_calculation_accuracy.py            # Precision validation
+│   └── test_swiss_ephemeris.py                 # Astronomical accuracy
+└── 🔧 unit/                                     # Unit tests by module
+    ├── test_natal_calculations.py              # Birth chart testing
+    ├── test_cache_manager.py                   # Caching system tests
+    └── test_metrics_manager.py                 # Monitoring tests
+
+🛠️ scripts/                                      # Automation & utility scripts
+│
+├── 🛠️ development/                              # Local development tools
+│   ├── setup_dev_env.sh                        # Development setup
+│   └── reset_cache.sh                          # Cache management
+├── 🚀 deployment/                               # Deployment automation
+│   ├── backup_data.sh                          # Data backup
+│   └── rollback_deployment.sh                  # Rollback procedures
+├── 🧪 testing/                                 # Test automation
+│   ├── run_all_tests.sh                        # Complete test runner
+│   └── performance_benchmark.sh                # Performance testing
+└── ✅ validation/                               # Data validation tools
+    ├── validate_calculations.py                # Accuracy validation
+    └── check_swiss_ephemeris.py                # Ephemeris verification
+
+⚙️ config/                                       # Configuration management
+│
+├── 🌐 gunicorn.conf.py                          # WSGI server configuration
+├── 🔒 nginx.conf                                # Reverse proxy config
+├── 📊 prometheus.yml                            # Metrics configuration
+└── 🗄️ redis.conf                               # Cache configuration
+
+☁️ deployment/                                   # Cloud deployment configs
+│
+├── 💙 digitalocean-backup/                      # DigitalOcean setup
+│   └── ... (backup deployment option)
+│
+└── 🔵 google-cloud/                             # Google Cloud Platform
+    ├── 🚀 deploy-gcp.sh                         # Main deployment script
+    ├── 🐳 Dockerfile.gcp                        # GCP-optimized container
+    ├── ⚙️ cloudbuild.yaml                       # CI/CD pipeline config
+    ├── 🌍 .env.gcp                              # GCP environment variables
+    ├── ⚙️ gcp-config.env                        # GCP service configuration
+    ├── 🏗️ terraform/                            # Infrastructure as Code
+    │   ├── main.tf                              # Main Terraform config
+    │   ├── variables.tf                         # Variable definitions
+    │   └── outputs.tf                           # Output definitions
+    └── 📋 deployment-guide.md                   # Step-by-step deployment
+
+📊 logs/                                         # Application logging
+│
+├── 📊 astro_engine.log                          # Main application log
+├── ❌ astro_engine_errors.log                   # Error logs
+├── ⚡ astro_engine_performance.log              # Performance metrics
+├── 🖥️ server.log                               # Server-specific logs
+└── 🔧 nohup.out                                # Background process logs
+```
+
+</details>
+
+### 🎯 Key File Importance Matrix
+
+<div align="center">
+
+| 🔥 **Critical Files** | 📊 **Important Files** | 🔧 **Supporting Files** |
+|----------------------|------------------------|-------------------------|
+| `app.py` - Entry point | `cache_manager.py` | `structured_logger.py` |
+| `LahairiAyanmasa.py` | `metrics_manager.py` | `celery_manager.py` |
+| `natal.py` - Core calculations | `KpNew.py` | `docker-compose.yml` |
+| `Dockerfile` | `D9.py` - Navamsha | `requirements.txt` |
+| `deploy-gcp.sh` | `vimshottari.py` | Test files |
+
+</div>
+
+### 🗺️ Navigation Guide for Developers
+
+<details>
+<summary><strong>👨‍💻 For New Developers</strong></summary>
+
+**Recommended exploration order:**
+1. 📖 Read this README.md completely
+2. 🚀 Examine `app.py` for application structure  
+3. 📍 Browse `routes/LahairiAyanmasa.py` for API endpoints
+4. 🌟 Study `natalCharts/natal.py` for calculation logic
+5. 🗄️ Review `cache_manager.py` for performance optimization
+6. 🐳 Check `docker-compose.yml` for service architecture
+
+</details>
+
+<details>
+<summary><strong>🐛 For Debugging Issues</strong></summary>
+
+**Common debugging paths:**
+1. 📊 Check `logs/` directory for error logs
+2. 📝 Review `structured_logger.py` for logging configuration
+3. 🧪 Run tests in `tests/` to isolate issues
+4. 📈 Check `metrics_manager.py` for performance metrics
+5. 🗄️ Verify `cache_manager.py` for caching issues
+
+</details>
+
+<details>
+<summary><strong>🚀 For Deployment</strong></summary>
+
+**Deployment-related files:**
+1. 🐳 `Dockerfile` and `docker-compose.yml` for containerization
+2. ☁️ `deployment/google-cloud/` for GCP deployment
+3. ⚙️ `config/` for server configuration
+4. 🛠️ `scripts/deployment/` for automation
+5. 📊 Documentation in `docs/deployment/`
+
+</details>
+
+<details>
+<summary><strong>🔧 For Adding Features</strong></summary>
+
+**Development workflow:**
+1. 📍 Add new endpoints in appropriate `routes/` file
+2. 🧠 Implement calculation logic in relevant `engine/` subdirectory
+3. 🧪 Add tests in corresponding `tests/` subdirectory
+4. 📊 Update metrics in `metrics_manager.py`
+5. 🗄️ Consider caching in `cache_manager.py`
+6. 📖 Update API documentation
+
+</details>
+
+This project structure supports scalable development with clear separation of concerns, making it easy for teams to work on different aspects of the astrological calculation system simultaneously.
 
 ## 🚀 Quick Start Guide
 
