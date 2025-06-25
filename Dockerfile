@@ -46,5 +46,8 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 # Expose port
 EXPOSE 5000
 
+# Copy Gunicorn config
+COPY gunicorn.conf.py /app/gunicorn.conf.py
+
 # Production command with Gunicorn
 CMD ["gunicorn", "--config", "gunicorn.conf.py", "astro_engine.app:app"]

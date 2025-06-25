@@ -27,15 +27,15 @@ try:
     from .celery_manager import create_celery_manager
 except ImportError:
     # Fallback to absolute imports (for direct execution)
-    from engine.routes.KpNew import kp
-    from engine.routes.LahairiAyanmasa import bp
-    from engine.routes.RamanAyanmasa import rl
+    from .engine.routes.KpNew import kp
+    from .engine.routes.LahairiAyanmasa import bp
+    from .engine.routes.RamanAyanmasa import rl
     
     # Import performance enhancements
-    from cache_manager import create_cache_manager
-    from metrics_manager import create_metrics_manager
-    from structured_logger import create_structured_logger
-    from celery_manager import create_celery_manager
+    from .cache_manager import create_cache_manager
+    from .metrics_manager import create_metrics_manager
+    from .structured_logger import create_structured_logger
+    from .celery_manager import create_celery_manager
 
 def create_app():
     """Application factory pattern"""
@@ -60,13 +60,26 @@ def create_app():
     
     # Logging configuration
     log_level = getattr(logging, os.getenv('LOG_LEVEL', 'INFO').upper())
+    # Ensure log directory exists
+    log_file = os.getenv('LOG_FILE', '/app/logs/astro_engine.log')
+    log_dir = os.path.dirname(log_file)
+    if log_dir and not os.path.exists(log_dir):
+        os.makedirs(log_dir, exist_ok=True)
+
+    handlers = []
+    try:
+        file_handler = logging.FileHandler(log_file)
+        handlers.append(file_handler)
+        print(f"Logging to file: {log_file}")
+    except Exception as e:
+        print(f"WARNING: Could not create log file handler at {log_file}: {e}\nLogging only to stdout.")
+
+    handlers.append(logging.StreamHandler(sys.stdout))
+
     logging.basicConfig(
         level=log_level,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.FileHandler(os.getenv('LOG_FILE', 'astro_engine.log')),
-            logging.StreamHandler(sys.stdout)
-        ]
+        handlers=handlers
     )
     
     # Set Swiss Ephemeris path
