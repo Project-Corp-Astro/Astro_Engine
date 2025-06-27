@@ -87,8 +87,8 @@ def create_app():
     swe.set_ephe_path(ephe_path)
     
     # Initialize Redis cache manager
-    cache_manager = create_cache_manager(app)
-    app.logger.info(f"Cache manager initialized: {'✅ Redis available' if cache_manager.is_available() else '❌ Redis unavailable'}")
+    # cache_manager = create_cache_manager(app)
+    # app.logger.info(f"Cache manager initialized: {'✅ Redis available' if cache_manager.is_available() else '❌ Redis unavailable'}")
     
     # Initialize Prometheus metrics manager
     metrics_manager = create_metrics_manager(app)

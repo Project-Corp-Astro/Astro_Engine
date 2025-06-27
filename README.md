@@ -986,7 +986,7 @@ docker-compose up -d --scale astro-engine=3
 # Manual container inspection
 docker-compose ps                    # Check container status
 docker-compose logs astro-engine    # View application logs
-docker-compose logs redis           # View Redis logs
+# docker-compose logs redis           # View Redis logs
 docker exec -it astro_engine_app bash  # Access container shell
 ```
 
