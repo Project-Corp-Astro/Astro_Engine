@@ -63,8 +63,10 @@ def create_app():
     # Ensure log directory exists
     log_file = os.getenv('LOG_FILE', '/app/logs/astro_engine.log')
     log_dir = os.path.dirname(log_file)
-    if log_dir and not os.path.exists(log_dir):
-        os.makedirs(log_dir, exist_ok=True)
+    # if log_dir and not os.path.exists(log_dir):
+    #     os.makedirs(log_dir, exist_ok=True)
+    log_dir = "/tmp/logs"
+    os.makedirs(log_dir, exist_ok=True)
 
     handlers = []
     try:
