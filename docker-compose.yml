@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: astro_engine_app
+    container_name: astro_engine
     ports:
       - "5000:5000"
     volumes:
